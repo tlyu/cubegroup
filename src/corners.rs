@@ -56,6 +56,18 @@ impl<'a> Mul<&'a Corners> for &'a Corners {
         *self * *rhs
     }
 }
+impl Mul<Turn> for Corners {
+    type Output = Corners;
+    fn mul(self, rhs: Turn) -> Corners {
+        self * CORNER_TURNS[rhs]
+    }
+}
+impl<'a> Mul<Turn> for &'a Corners {
+    type Output = Corners;
+    fn mul(self, rhs: Turn) -> Corners {
+        *self * rhs
+    }
+}
 impl Not for Corners {
     type Output = Corners;
     fn not(self) -> Self {
@@ -74,13 +86,10 @@ impl Not for &Corners {
 }
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }
-    pub fn turn(&self, t: Turn) -> Self {
-        self * &CORNER_TURNS[t]
-    }
     pub fn turns(&self, t: &[Turn]) -> Self {
         let mut out = *self;
         for x in t {
-            out = out.turn(*x);
+            out = out * *x;
         }
         out
     }

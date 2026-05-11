@@ -68,6 +68,18 @@ impl<'a> Mul<&'a Edges> for &'a Edges{
         *self * *rhs
     }
 }
+impl Mul<Turn> for Edges {
+    type Output = Edges;
+    fn mul(self, rhs: Turn) -> Edges {
+        self * EDGE_TURNS[rhs]
+    }
+}
+impl Mul<Turn> for &Edges {
+    type Output = Edges;
+    fn mul(self, rhs: Turn) -> Edges {
+        *self * rhs
+    }
+}
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Self {
@@ -84,13 +96,10 @@ impl Not for &Edges {
     fn not(self) -> Edges { !*self }
 }
 impl Edges {
-    pub fn turn(&self, t: Turn) -> Edges {
-        *self * EDGE_TURNS[t]
-    }
     pub fn turns(&self, t: &[Turn]) -> Edges {
         let mut out = *self;
         for x in t {
-            out = out.turn(*x);
+            out = out * *x;
         }
         out
     }
