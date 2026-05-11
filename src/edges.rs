@@ -3,6 +3,7 @@ use std::ops::{Index, IndexMut, Mul, Not};
 
 use super::Turn;
 
+// Lower 4 bits for id, bit 4 for flip
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Edge(u8);
 impl Display for Edge {

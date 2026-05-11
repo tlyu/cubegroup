@@ -38,5 +38,3 @@ impl<T> IndexMut<Turn> for [T] {
         &mut self[i as usize]
     }
 }
-
-// Lower 4 bits for id, bit 4 for flip

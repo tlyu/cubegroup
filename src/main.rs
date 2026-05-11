@@ -24,10 +24,10 @@ fn main() {
 
     println!("sledge: {}", edges.turns(&[R3, F1, R1, F3]));
 
-    assert_eq!(corners.turn(U2), corners.turn(U2).invert());
-    assert_eq!(corners.turn(U3), corners.turn(U1).invert());
-    assert_eq!(corners.turn(R2), corners.turn(R2).invert());
-    assert_eq!(corners.turn(R3), corners.turn(R1).invert());
+    assert_eq!(corners.turn(U2), !corners.turn(U2));
+    assert_eq!(corners.turn(U3), !corners.turn(U1));
+    assert_eq!(corners.turn(R2), !corners.turn(R2));
+    assert_eq!(corners.turn(R3), !corners.turn(R1));
     assert_eq!(corners.turn(F3), !corners.turn(F1));
 
     assert_eq!(edges.turn(U3), !edges.turn(U1));

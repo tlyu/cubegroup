@@ -4,21 +4,17 @@ use std::ops::{Index, IndexMut, Mul, Not};
 use super::Turn;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct Corner {
-    id: u8,
-    twist: u8 // 0 = none, 1 = CW, 2 = CCW
-}
+pub struct Corner(u8);
 impl Corner {
-    fn twist(&self, t: u8) -> Self {
-        Corner { id: self.id, twist: (self.twist + t) % 3 }
+    fn id(&self) -> u8 { self.0 & 0x07 }
+    fn twist(&self) -> u8 { (self.0 & 0x30) >> 4 }
+    fn dotwist(&self, t: u8) -> Self {
+        Corner(self.id() | (((self.twist() + t) % 3) << 4))
     }
-    fn untwist(&self, t: u8) -> Self {
-        let (id, twist) = (self.id, (3 + self.twist - t) % 3);
-        Corner { id: id, twist }
-    }
+    fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
 }
 impl From<u8> for Corner {
-    fn from(id: u8) -> Corner { Corner{ id, twist: 0 } }
+    fn from(id: u8) -> Corner { Corner(id) }
 }
 // Singmaster piece notation: facets in clockwise order
 static CORNERS_SINGMASTER: [&str; 8] = [
@@ -27,22 +23,20 @@ static CORNERS_SINGMASTER: [&str; 8] = [
 ];
 impl Display for Corner {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let s = CORNERS_SINGMASTER[self.id as usize];
-        let twist = 3 - self.twist as usize;
+        let s = CORNERS_SINGMASTER[self.id() as usize];
+        let twist = 3 - self.twist() as usize;
         // Singmaster piece notation has the U/D facet first,
         // so invert the twist to output in the correct order
         write!(f, "{}{}", &s[(twist)..], &s[..(twist)])
     }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Corners {
-    v: [Corner; 8]
-}
+pub struct Corners([Corner; 8]);
 const CORNERS_IDENT: Corners = const {
-    let mut c = Corners { v: [Corner { id: 0, twist: 0 }; 8] };
+    let mut c = Corners([Corner(0); 8]);
     let mut id = 0;
     while id < 8 {
-        c.v[id as usize] = Corner { id, twist: 0 };
+        c.0[id as usize] = Corner(id);
         id += 1;
     }
     c
@@ -53,7 +47,7 @@ impl Default for Corners {
 impl Mul for Corners {
     type Output = Corners;
     fn mul(self, rhs: Self) -> Self::Output {
-        Corners{v: rhs.v.map(|x| self[x.id].twist(x.twist))}
+        Corners(rhs.0.map(|x| self[x.id()].dotwist(x.twist())))
     }
 }
 impl<'a> Mul<&'a Corners> for &'a Corners {
@@ -67,9 +61,9 @@ impl Not for Corners {
     fn not(self) -> Self {
         let mut out = Corners::new();
         for i in 0..8 {
-            let v = &mut out[self[i].id];
-            v.id = i;
-            *v = v.untwist(self[i].twist);
+            let v = &mut out[self[i].id()];
+            *v = Corner(i);
+            *v = v.untwist(self[i].twist());
         }
         out
     }
@@ -79,7 +73,7 @@ impl Not for &Corners {
     fn not(self) -> Corners { !*self }
 }
 impl Corners {
-    fn new () -> Self { Corners{v: [Corner::default(); 8]} }
+    fn new () -> Self { Corners([Corner(0); 8]) }
     pub fn turn(&self, t: Turn) -> Self {
         self * &CORNER_TURNS[t]
     }
@@ -90,20 +84,11 @@ impl Corners {
         }
         out
     }
-    pub fn invert(&self) -> Self {
-        let mut out = Corners::new();
-        for i in 0..8 {
-            let v = &mut out[self[i].id];
-            v.id = i;
-            *v = v.untwist(self[i].twist);
-        }
-        out
-    }
 }
 impl Display for Corners {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut first = true;
-        for corner in &self.v {
+        for corner in &self.0 {
             if !first { write!(f, " ")?; }
             first = false;
             write!(f, "{corner}")?;
@@ -114,25 +99,24 @@ impl Display for Corners {
 impl Index<u8> for Corners {
     type Output = Corner;
     fn index(&self, i: u8) -> &Self::Output {
-        &self.v[i as usize]
+        &self.0[i as usize]
     }
 }
 impl IndexMut<u8> for Corners {
     fn index_mut(&mut self, i: u8) -> &mut Self::Output {
-        &mut self.v[i as usize]
+        &mut self.0[i as usize]
     }
 }
 
-#[macro_export]
 macro_rules! corners {
     ( $(($id:expr, $tw:expr)),* ) => {
-        Corners { v: [
-            $( Corner { id: $id, twist: $tw }, )*
-        ]}
+        Corners([
+            $( Corner($id | ($tw << 4)), )*
+        ])
     }
 }
 
-const CORNER_TURNS: [Corners; 18] = [
+static CORNER_TURNS: [Corners; 18] = [
     corners![(3, 0), (0, 0), (1, 0), (2, 0), (4, 0), (5, 0), (6, 0), (7, 0)], // U1
     corners![(2, 0), (3, 0), (0, 0), (1, 0), (4, 0), (5, 0), (6, 0), (7, 0)], // U2
     corners![(1, 0), (2, 0), (3, 0), (0, 0), (4, 0), (5, 0), (6, 0), (7, 0)], // U3
