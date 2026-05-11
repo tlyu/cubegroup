@@ -5,8 +5,10 @@ fn main() {
     println!("default corners: {corners}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{:?}: {}", t, corners * t);
+        println!("{:?} cycles: {}", t, (corners * t).cycles());
     }
     println!("sledge: {}", corners.turns(&[R3, F1, R1, F3]));
+    println!("sledge cycles: {}", corners.turns(&[R3, F1, R1, F3]).cycles());
 
     let edges = Edges::default();
     println!("default edges: {edges}");

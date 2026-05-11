@@ -113,6 +113,33 @@ impl Corners {
         }
         out
     }
+    pub fn cycles(&self) -> CornerCycles {
+        let mut unseen = 0xffu8;
+        let mut i = 0u8;
+        let mut out = CornerCycles::default();
+        let mut v = Vec::<Corner>::new();
+        while unseen != 0 {
+            unseen &= !(1 << i);
+            // Follow a cycle
+            if self[i].id() != i {
+                v.insert(0, self[i]);
+                i = self[i].id();
+                // Keep accumulating until we get back to the cycle start
+                if (unseen & (1 << i)) != 0 {
+                    continue;
+                }
+            }
+            // Otherwise, find the lowest unseen piece
+            i = unseen.trailing_zeros() as u8;
+            if v.is_empty() {
+                continue;
+            }
+            // Append a cycle if there is a non-empty one
+            out.0.push(v);
+            v = Vec::<Corner>::new();
+        }
+        out
+    }
 }
 impl Display for Corners {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -170,3 +197,30 @@ static CORNER_TURNS: [Corners; 18] = [
     corners![(4, 0), (1, 0), (2, 0), (7, 0), (0, 0), (5, 0), (6, 0), (3, 0)], // L2
     corners![(3, 2), (1, 0), (2, 0), (4, 1), (7, 2), (5, 0), (6, 0), (0, 1)], // L3
 ];
+
+#[derive(Debug, Default)]
+pub struct CornerCycles(Vec<Vec<Corner>>);
+impl Display for CornerCycles {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        let mut twist = 0u8;
+        let mut first = true;
+        for c in &self.0 {
+            write!(f, "(")?;
+            for x in c {
+                if !first { write!(f, ",")?; }
+                first = false;
+                write!(f, "{x}")?;
+                twist += x.twist();
+            }
+            write!(f, ")")?;
+            match twist % 3 {
+                1 => { write!(f, "-")?; },
+                2 => { write!(f, "+")?; },
+                _ => (),
+            };
+            twist = 0;
+            first = true;
+        }
+        Ok(())
+    }
+}
