@@ -36,11 +36,17 @@ impl Display for Corner {
 struct Corners {
     v: [Corner; 8]
 }
-impl Default for Corners {
-    fn default() -> Self {
-        let v = [0, 1, 2, 3, 4, 5, 6, 7].map(Corner::from);
-        Corners{v}
+const CORNERS_IDENT: Corners = const {
+    let mut c = Corners { v: [Corner { id: 0, twist: 0 }; 8] };
+    let mut id = 0;
+    while id < 8 {
+        c.v[id as usize] = Corner { id, twist: 0 };
+        id += 1;
     }
+    c
+};
+impl Default for Corners {
+    fn default() -> Self { CORNERS_IDENT }
 }
 impl Mul for Corners {
     type Output = Corners;
@@ -72,11 +78,6 @@ impl Not for &Corners {
 }
 impl Corners {
     fn new () -> Self { Corners{v: [Corner::default(); 8]} }
-    #[cfg(false)]
-    fn turn_(&self, t: &Corners) -> Self {
-        let v = t.v.map(|x| self[x.id].twist(x.twist));
-        Corners{v}
-    }
     fn turn(&self, t: Turn) -> Self {
         self * &CORNER_TURNS[t]
     }
