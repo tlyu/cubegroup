@@ -39,7 +39,7 @@ fn main() {
     assert_eq!(s * s, corners.turns(&[R1, U1, R3, U3, R1, U1, R3, U3]));
 
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
-        println!("{:?} parity={}", t, (corners * t).parity());
+        println!("{:?} corner parity={}", t, (corners * t).parity());
     }
     for (lhs, rhs) in [
         (U1, true), (U2, false), (U3, true),
@@ -50,6 +50,7 @@ fn main() {
         (L1, true), (L2, false), (L3, true),
     ] {
         assert_eq!((corners * lhs).parity(), rhs);
+        assert_eq!((edges * lhs).parity(), rhs);
     }
     assert!(!(corners.turns(&[R3, F1, R1, F3])).parity());
 }

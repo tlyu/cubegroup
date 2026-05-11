@@ -103,6 +103,26 @@ impl Edges {
         }
         out
     }
+    pub fn parity(&self) -> bool {
+        let mut unseen = 0xfffu16;
+        let mut i = 0u8;
+        let mut out = false;
+        while unseen != 0 {
+            unseen &= !(1 << i);
+            // Follow a cycle
+            if self[i].0 & 0xf != i {
+                i = self[i].0 & 0xf;
+                // Only toggle parity if not coming back to the cycle start
+                if (unseen & (1 << i)) != 0 {
+                    out = !out;
+                    continue;
+                }
+            }
+            // Otherwise, find the lowest unseen piece
+            i = unseen.trailing_zeros() as u8;
+        }
+        out
+    }
 }
 
 macro_rules! edges {
