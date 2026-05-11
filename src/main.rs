@@ -2,46 +2,38 @@ use cube_foo::*;
 fn main() {
     use Turn::*;
     let corners = Corners::default();
-    println!("{corners}");
-    println!("U1: {}", corners * U1);
-    println!("U2: {}", corners * U2);
-    println!("U3: {}", corners * U3);
-    println!("R1: {}", corners * R1);
-    println!("R2: {}", corners * R2);
-    println!("R3: {}", corners * R3);
-
-    println!("R1U1R3U3R1U1R3U3: {}", corners.turns(&[R1, U1, R3, U3, R1, U1, R3, U3]));
+    println!("default corners: {corners}");
+    for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
+        println!("{:?}: {}", t, corners * t);
+    }
     println!("sledge: {}", corners.turns(&[R3, F1, R1, F3]));
 
     let edges = Edges::default();
-    println!("{edges}");
-    println!("U1: {}", edges * U1);
-    println!("U2: {}", edges * U2);
-    println!("U3: {}", edges * U3);
-    println!("R1: {}", edges * R1);
-    println!("R2: {}", edges * R2);
-    println!("R3: {}", edges * R3);
-
+    println!("default edges: {edges}");
+    for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
+        println!("{:?}: {}", t, edges * t);
+    }
     println!("sledge: {}", edges.turns(&[R3, F1, R1, F3]));
 
-    assert_eq!(corners * U2, !(corners * U2));
-    assert_eq!(corners * U3, !(corners * U1));
-    assert_eq!(corners * R2, !(corners * R2));
-    assert_eq!(corners * R3, !(corners * R1));
-    assert_eq!(corners * F3, !(corners * F1));
+    let cube = Cube::default();
+    println!("default cube: {cube}");
+    for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
+        println!("{:?}: {}", t, cube * t);
+    }
+    println!("sledge: {}", cube.turns(&[R3, F1, R1, F3]));
 
-    assert_eq!(edges * U3, !(edges * U1));
-    assert_eq!(edges * U2, !(edges * U2));
-    assert_eq!(edges * R3, !(edges * R1));
-    assert_eq!(edges * R2, !(edges * R2));
-    assert_eq!(edges * F3, !(edges * F1));
-    assert_eq!(edges * F2, !(edges * F2));
-    assert_eq!(edges * D3, !(edges * D1));
-    assert_eq!(edges * D2, !(edges * D2));
-    assert_eq!(edges * B3, !(edges * B1));
-    assert_eq!(edges * B2, !(edges * B2));
-    assert_eq!(edges * L3, !(edges * L1));
-    assert_eq!(edges * L2, !(edges * L2));
+    for (lhs, rhs) in [
+        (U1, U3), (U2, U2), (U3, U1),
+        (R1, R3), (R2, R2), (R3, R1),
+        (F1, F3), (F2, F2), (F3, F1),
+        (D1, D3), (D2, D2), (D3, D1),
+        (B1, B3), (B2, B2), (B3, B1),
+        (L1, L3), (L2, L2), (L3, L1),
+    ] {
+        assert_eq!(corners * lhs, !(corners * rhs));
+        assert_eq!(edges * lhs, !(edges * rhs));
+        assert_eq!(cube * lhs, !(cube * rhs));
+    }
 
     let s = corners.turns(&[R1, U1, R3, U3]);
     assert_eq!(s * s, corners.turns(&[R1, U1, R3, U3, R1, U1, R3, U3]));
