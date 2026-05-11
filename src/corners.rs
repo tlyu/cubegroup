@@ -93,6 +93,26 @@ impl Corners {
         }
         out
     }
+    pub fn parity(&self) -> bool {
+        let mut unseen = 0xffu8;
+        let mut i = 0u8;
+        let mut out = false;
+        while unseen != 0 {
+            unseen &= !(1 << i);
+            // Follow a cycle
+            if self[i].id() != i {
+                i = self[i].id();
+                // Only toggle parity if not coming back to the cycle start
+                if (unseen & (1 << i)) != 0 {
+                    out = !out;
+                    continue;
+                }
+            }
+            // Otherwise, find the lowest unseen piece
+            i = unseen.trailing_zeros() as u8;
+        }
+        out
+    }
 }
 impl Display for Corners {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
