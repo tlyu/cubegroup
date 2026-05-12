@@ -35,6 +35,9 @@ pub enum Turn {
     B3 = 17,
 }
 impl Turn {
+    pub fn allturns() -> impl Iterator<Item=Turn> {
+        (0..18).map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8)})
+    }
     fn axis(self) -> Axis {
         match self.face() as u8 % 3 {
             0 => Axis::Y,

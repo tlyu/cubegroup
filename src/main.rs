@@ -51,6 +51,7 @@ fn main() {
         let v: Vec<_> = x.into_iter().collect();
         println!("{:?}: {:?}", x, v);
     }
+    println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
 }
 
 #[cfg(test)]
