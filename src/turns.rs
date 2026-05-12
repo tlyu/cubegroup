@@ -1,7 +1,16 @@
 use std::fmt::{self, Display};
+use std::iter::{IntoIterator, Iterator};
 use std::ops::{Index, IndexMut};
 use std::str::FromStr;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Face {
+    U, R, F, D, L, B,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Axis {
+    Y, X, Z,
+}
 #[allow(unused)]
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
@@ -18,12 +27,65 @@ pub enum Turn {
     D1 = 9,
     D2 = 10,
     D3 = 11,
-    B1 = 12,
-    B2 = 13,
-    B3 = 14,
-    L1 = 15,
-    L2 = 16,
-    L3 = 17,
+    L1 = 12,
+    L2 = 13,
+    L3 = 14,
+    B1 = 15,
+    B2 = 16,
+    B3 = 17,
+}
+impl Turn {
+    fn axis(self) -> Axis {
+        match self.face() as u8 % 3 {
+            0 => Axis::Y,
+            1 => Axis::X,
+            2 => Axis::Z,
+            _ => unreachable!(),
+        }
+    }
+    fn face(self) -> Face {
+        match self as u8 / 3 {
+            0 => Face::U,
+            1 => Face::R,
+            2 => Face::F,
+            3 => Face::D,
+            4 => Face::L,
+            5 => Face::B,
+            _ => unreachable!(),
+        }
+    }
+    fn face_sign(self) -> bool {
+        (self as u8 / 9) != 0
+    }
+    fn filter(self, rhs: Turn) -> bool {
+        if self.face() == rhs.face() {
+            return false;
+        }
+        !self.face_sign() || self.axis() != rhs.axis()
+    }
+}
+pub struct TurnIter(Box<dyn Iterator<Item=Turn>>);
+impl TurnIter {
+    fn new(turn: Turn) -> Self {
+        Self (
+            Box::new((0..18)
+                .map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8)})
+                .filter(move |x| turn.filter(*x)))
+        )
+    }
+}
+impl Iterator for TurnIter {
+    type Item = Turn;
+    fn next(&mut self) -> Option<Turn> {
+        self.0.next()
+    }
+}
+impl IntoIterator for Turn {
+    type Item = Turn;
+    type IntoIter = TurnIter;
+    fn into_iter(self) -> Self::IntoIter {
+        TurnIter::new(self)
+    }
 }
 impl<T> Index<Turn> for [T] {
     type Output = T;

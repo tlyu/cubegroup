@@ -43,9 +43,14 @@ fn main() {
     println!("F R U R' U' F' U: {}", cube.turns(&[F1, R1, U1, R3, U3, F3, U1]).cycles());
 
     println!("{}", "R U R' U'".parse::<Turns>().unwrap());
-    let t = "F R U R' U' F'".parse::<Turns>().unwrap();
+    let t = "F    R U R' U' F'".parse::<Turns>().unwrap();
     println!("{t}: {}", cube * &t);
     println!("{t}: {}", (cube * &t).cycles());
+
+    for x in [U1, U2, R1, F1, D1, L1, B1] {
+        let v: Vec<_> = x.into_iter().collect();
+        println!("{:?}: {:?}", x, v);
+    }
 }
 
 #[cfg(test)]
