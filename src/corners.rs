@@ -4,7 +4,7 @@ use std::ops::{Index, IndexMut, Mul, Not};
 use super::Turn;
 use super::Turns;
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Corner(u8);
 impl Corner {
     fn id(&self) -> u8 { self.0 & 0x07 }
@@ -31,7 +31,7 @@ impl Display for Corner {
         write!(f, "{}{}", &s[(twist)..], &s[..(twist)])
     }
 }
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Corners([Corner; 8]);
 const CORNERS_IDENT: Corners = const {
     let mut c = Corners([Corner(0); 8]);

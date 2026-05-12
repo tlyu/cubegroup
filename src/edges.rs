@@ -5,7 +5,7 @@ use super::Turn;
 use super::Turns;
 
 // Lower 4 bits for id, bit 4 for flip
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Edge(u8);
 impl Display for Edge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -14,7 +14,7 @@ impl Display for Edge {
         write!(f, "{}{}", &s[flip..], &s[..flip])
     }
 }
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Edges([Edge; 12]);
 static EDGES_SINGMASTER: [&str; 12] = [
     "UB", "UR", "UF", "UL",

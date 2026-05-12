@@ -35,8 +35,8 @@ pub enum Turn {
     B3 = 17,
 }
 impl Turn {
-    pub fn allturns() -> impl Iterator<Item=Turn> {
-        (0..18).map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8)})
+    pub fn allturns() -> TurnIter {
+        TurnIter::new(Turn::U1, true)
     }
     fn axis(self) -> Axis {
         match self.face() as u8 % 3 {
@@ -69,11 +69,11 @@ impl Turn {
 }
 pub struct TurnIter(Box<dyn Iterator<Item=Turn>>);
 impl TurnIter {
-    fn new(turn: Turn) -> Self {
+    fn new(turn: Turn, all: bool) -> Self {
         Self (
             Box::new((0..18)
                 .map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8)})
-                .filter(move |x| turn.filter(*x)))
+                .filter(move |x| all || turn.filter(*x)))
         )
     }
 }
@@ -87,7 +87,7 @@ impl IntoIterator for Turn {
     type Item = Turn;
     type IntoIter = TurnIter;
     fn into_iter(self) -> Self::IntoIter {
-        TurnIter::new(self)
+        TurnIter::new(self, false)
     }
 }
 impl<T> Index<Turn> for [T] {

@@ -1,6 +1,32 @@
+use std::cell::RefCell;
+use std::collections::HashSet;
 use std::str::FromStr;
 
 use cube_foo::*;
+
+fn do_level(level: usize, max_level: usize, prev_move: Turn, prev_cube: Cube, counts: &Vec<RefCell<u64>>, hash: &RefCell<HashSet<Cube>>) {
+    let mut count = counts[level].borrow_mut();
+    let mut iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
+    let mut v = Vec::<(Turn, Cube)>::new();
+    {
+        let mut muthash = hash.borrow_mut();
+        for t in iter {
+            let cube = prev_cube * t;
+            v.push((t, cube));
+            if muthash.insert(cube) {
+                *count += 1;
+            }
+        }
+    }
+    println!("level {:width$} move {} count {}", level, prev_move, count, width = (level as usize));
+    if level == max_level {
+        return;
+    }
+    // iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
+    for (t, cube) in v {
+        do_level(level + 1, max_level, t, cube, counts, hash);
+    }
+}
 
 fn main() {
     use Turn::*;
@@ -52,6 +78,10 @@ fn main() {
         println!("{:?}: {:?}", x, v);
     }
     println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
+
+    let counts = vec![RefCell::new(0u64); 7];
+    let hash = RefCell::new(HashSet::<Cube>::new());
+    do_level(1, 4, U1, Cube::default(), &counts, &hash);
 }
 
 #[cfg(test)]

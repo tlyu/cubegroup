@@ -13,7 +13,7 @@ pub trait CornersTrait: Clone + Copy + fmt::Debug + Display + Eq + Mul + Mul<Tur
 {
 }
 impl CornersTrait for Corners {}
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
