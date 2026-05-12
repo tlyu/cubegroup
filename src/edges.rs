@@ -123,6 +123,36 @@ impl Edges {
         }
         out
     }
+    pub fn cycles(&self) -> EdgeCycles {
+        let mut unseen = 0xfffu16;
+        let mut i = 0u8;
+        let mut out = EdgeCycles::default();
+        let mut v = Vec::<Edge>::new();
+        let mut flip = 0u8;
+        while unseen != 0 {
+            unseen &= !(1 << i);
+            // Follow a cycle, including pieces twisted in place
+            if self[i].0 & 0xf != i || self[i].0 & 0x10 != 0 {
+                flip ^= self[i].0 & 0x10;
+                i = self[i].0 & 0xf;
+                v.insert(0, Edge(i | flip));
+                // Keep accumulating until we get back to the cycle start
+                if (unseen & (1 << i)) != 0 {
+                    continue;
+                }
+            }
+            // Otherwise, find the lowest unseen piece
+            i = unseen.trailing_zeros() as u8;
+            if v.is_empty() {
+                continue;
+            }
+            // Append a cycle if there is a non-empty one
+            out.0.push((v, flip));
+            flip = 0;
+            v = Vec::<Edge>::new();
+        }
+        out
+    }
 }
 
 macro_rules! edges {
@@ -157,3 +187,26 @@ static EDGE_TURNS: [Edges; 18] = [
     edges![(0, 0), (1, 0), (2, 0), (11, 0), (7, 0), (5, 0), (6, 0), (4, 0), (8, 0), (9, 0), (10, 0), (3, 0)], // L2
     edges![(0, 0), (1, 0), (2, 0), (7, 0), (3, 0), (5, 0), (6, 0), (11, 0), (8, 0), (9, 0), (10, 0), (4, 0)], // L3
 ];
+
+#[derive(Debug, Default)]
+pub struct EdgeCycles(Vec<(Vec<Edge>, u8)>);
+impl Display for EdgeCycles {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        let mut first = true;
+        for (c, flip) in &self.0 {
+            write!(f, "(")?;
+            for x in c {
+                if !first { write!(f, ",")?; }
+                first = false;
+                write!(f, "{x}")?;
+            }
+            write!(f, ")")?;
+            match flip {
+                x if *x != 0 => { write!(f, "+")?; },
+                _ => (),
+            };
+            first = true;
+        }
+        Ok(())
+    }
+}

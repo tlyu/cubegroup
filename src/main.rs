@@ -9,24 +9,33 @@ fn main() {
     }
     println!("sledge: {}", corners.turns(&[R3, F1, R1, F3]));
     println!("sledge cycles: {}", corners.turns(&[R3, F1, R1, F3]).cycles());
+    println!("double sledge cycles: {}", corners.turns(&[R3, F1, R1, F3, R3, F1, R1, F3]).cycles());
 
     let edges = Edges::default();
     println!("default edges: {edges}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{:?}: {}", t, edges * t);
+        println!("{:?} cycles: {}", t, (edges * t).cycles());
     }
     println!("sledge: {}", edges.turns(&[R3, F1, R1, F3]));
+    println!("sledge cycles: {}", edges.turns(&[R3, F1, R1, F3]).cycles());
 
     let cube = Cube::default();
     println!("default cube: {cube}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{:?}: {}", t, cube * t);
+        println!("{:?} cycles: {}", t, (cube * t).cycles());
     }
     println!("sledge: {}", cube.turns(&[R3, F1, R1, F3]));
+    println!("sledge cycles: {}", cube.turns(&[R3, F1, R1, F3]).cycles());
 
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{:?} corner parity={}", t, (corners * t).parity());
     }
+    let s = Cube::default().turns(&[R1, U1]);
+    println!("R U: {}", s.cycles());
+    println!("F R U R' U' F': {}", cube.turns(&[F1, R1, U1, R3, U3, F3]).cycles());
+    println!("F R U R' U' F' U: {}", cube.turns(&[F1, R1, U1, R3, U3, F3, U1]).cycles());
 }
 
 #[cfg(test)]

@@ -85,4 +85,15 @@ impl Cube {
         }
         out
     }
+    pub fn cycles(&self) -> CubeCycles {
+        CubeCycles(self.0.cycles(), self.1.cycles())
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct CubeCycles(CornerCycles, EdgeCycles);
+impl Display for CubeCycles {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}{}", self.0, self.1)
+    }
 }

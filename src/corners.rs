@@ -118,12 +118,14 @@ impl Corners {
         let mut i = 0u8;
         let mut out = CornerCycles::default();
         let mut v = Vec::<Corner>::new();
+        let mut twist = 0u8;
         while unseen != 0 {
             unseen &= !(1 << i);
-            // Follow a cycle
-            if self[i].id() != i {
-                v.insert(0, self[i]);
+            // Follow a cycle, including pieces twisted in place
+            if self[i].id() != i || self[i].twist() != 0 {
+                twist = (twist + 3 - self[i].twist()) % 3;
                 i = self[i].id();
+                v.insert(0, Corner(i).untwist(twist));
                 // Keep accumulating until we get back to the cycle start
                 if (unseen & (1 << i)) != 0 {
                     continue;
@@ -135,7 +137,8 @@ impl Corners {
                 continue;
             }
             // Append a cycle if there is a non-empty one
-            out.0.push(v);
+            out.0.push((v, twist));
+            twist = 0;
             v = Vec::<Corner>::new();
         }
         out
@@ -199,18 +202,16 @@ static CORNER_TURNS: [Corners; 18] = [
 ];
 
 #[derive(Debug, Default)]
-pub struct CornerCycles(Vec<Vec<Corner>>);
+pub struct CornerCycles(Vec<(Vec<Corner>, u8)>);
 impl Display for CornerCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut twist = 0u8;
         let mut first = true;
-        for c in &self.0 {
+        for (c, twist) in &self.0 {
             write!(f, "(")?;
             for x in c {
                 if !first { write!(f, ",")?; }
                 first = false;
                 write!(f, "{x}")?;
-                twist += x.twist();
             }
             write!(f, ")")?;
             match twist % 3 {
@@ -218,7 +219,6 @@ impl Display for CornerCycles {
                 2 => { write!(f, "+")?; },
                 _ => (),
             };
-            twist = 0;
             first = true;
         }
         Ok(())
