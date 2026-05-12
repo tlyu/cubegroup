@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
 use super::Turn;
+use super::Turns;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Corner(u8);
@@ -65,6 +66,22 @@ impl Mul<Turn> for Corners {
 impl<'a> Mul<Turn> for &'a Corners {
     type Output = Corners;
     fn mul(self, rhs: Turn) -> Corners {
+        *self * rhs
+    }
+}
+impl Mul<&Turns> for Corners {
+    type Output = Corners;
+    fn mul(self, rhs: &Turns) -> Corners {
+        let mut out = self;
+        for x in &rhs.0 {
+            out = out * *x;
+        }
+        out
+    }
+}
+impl Mul<&Turns> for &Corners {
+    type Output = Corners;
+    fn mul(self, rhs: &Turns) -> Corners {
         *self * rhs
     }
 }

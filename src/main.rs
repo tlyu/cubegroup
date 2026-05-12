@@ -1,12 +1,17 @@
+use std::str::FromStr;
+
 use cube_foo::*;
+
 fn main() {
     use Turn::*;
     let corners = Corners::default();
     println!("default corners: {corners}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
-        println!("{:?}: {}", t, corners * t);
-        println!("{:?} cycles: {}", t, (corners * t).cycles());
+        println!("{}: {}", t, corners * t);
+        println!("{} cycles: {}", t, (corners * t).cycles());
     }
+    let s = "R";
+    println!("{s}: {}", (corners * Turn::from_str(s).unwrap()).cycles());
     println!("sledge: {}", corners.turns(&[R3, F1, R1, F3]));
     println!("sledge cycles: {}", corners.turns(&[R3, F1, R1, F3]).cycles());
     println!("double sledge cycles: {}", corners.turns(&[R3, F1, R1, F3, R3, F1, R1, F3]).cycles());
@@ -36,6 +41,11 @@ fn main() {
     println!("R U: {}", s.cycles());
     println!("F R U R' U' F': {}", cube.turns(&[F1, R1, U1, R3, U3, F3]).cycles());
     println!("F R U R' U' F' U: {}", cube.turns(&[F1, R1, U1, R3, U3, F3, U1]).cycles());
+
+    println!("{}", "R U R' U'".parse::<Turns>().unwrap());
+    let t = "F R U R' U' F'".parse::<Turns>().unwrap();
+    println!("{t}: {}", cube * &t);
+    println!("{t}: {}", (cube * &t).cycles());
 }
 
 #[cfg(test)]

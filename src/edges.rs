@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
 use super::Turn;
+use super::Turns;
 
 // Lower 4 bits for id, bit 4 for flip
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -77,6 +78,22 @@ impl Mul<Turn> for Edges {
 impl Mul<Turn> for &Edges {
     type Output = Edges;
     fn mul(self, rhs: Turn) -> Edges {
+        *self * rhs
+    }
+}
+impl Mul<&Turns> for Edges {
+    type Output = Edges;
+    fn mul(self, rhs: &Turns) -> Edges {
+        let mut out = self;
+        for x in &rhs.0 {
+            out = out * *x;
+        }
+        out
+    }
+}
+impl Mul<&Turns> for &Edges {
+    type Output = Edges;
+    fn mul(self, rhs: &Turns) -> Edges {
         *self * rhs
     }
 }
