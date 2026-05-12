@@ -105,7 +105,7 @@ impl Display for Turns {
 impl FromStr for Turns {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, ()> {
-        let r = s.split_whitespace().skip_while(|x| x.is_empty())
+        let r = s.split_whitespace().filter(|x| !x.is_empty())
             .map(Turn::from_str).collect::<Result<Vec<_>, _>>().or(Err(()));
         Ok(Turns(r?))
     }
