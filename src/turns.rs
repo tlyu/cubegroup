@@ -175,3 +175,13 @@ impl FromStr for Turns {
         Ok(Turns(r?))
     }
 }
+impl From<&[Turn]> for Turns {
+    fn from(x: &[Turn]) -> Turns {
+        Turns(x.into())
+    }
+}
+impl<const N: usize> From<&[Turn; N]> for Turns {
+    fn from(x: &[Turn; N]) -> Turns {
+        Turns((&x[..]).into())
+    }
+}
