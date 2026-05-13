@@ -8,11 +8,6 @@ pub use edges::*;
 mod turns;
 pub use turns::*;
 
-pub trait CornersTrait: Clone + Copy + fmt::Debug + Display + Eq + Mul + Mul<Turn> + for<'a> Mul<&'a Turns> + Not + PartialEq + Sized
-    where for<'a> &'a Self: Mul<&'a Self>, for<'a> &'a Self: Mul<Turn>, for<'a> &'a Self: Mul<&'a Turns>
-{
-}
-impl CornersTrait for Corners {}
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
