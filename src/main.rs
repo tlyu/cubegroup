@@ -1,31 +1,23 @@
 use std::cell::RefCell;
-use std::collections::HashSet;
+use std::collections::BTreeMap;
+// use std::collections::btree_map::Entry;
 use std::str::FromStr;
 
 use cube_foo::*;
 
-fn do_level(level: usize, max_level: usize, prev_move: Turn, prev_cube: Cube, counts: &Vec<RefCell<u64>>, hash: &RefCell<HashSet<Cube>>) {
-    let mut count = counts[level].borrow_mut();
-    let mut iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
-    let mut v = Vec::<(Turn, Cube)>::new();
-    {
-        let mut muthash = hash.borrow_mut();
-        for t in iter {
-            let cube = prev_cube * t;
-            v.push((t, cube));
-            if muthash.insert(cube) {
-                *count += 1;
-            }
+fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &RefCell<BTreeMap<u128, u8>>) {
+    let iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
+    for t in iter {
+        let cube = prev_cube * t;
+        {
+            let mut muthash = hash.borrow_mut();
+            muthash.entry(cube.pack()).and_modify(|x| *x = level.min(*x)).or_insert(level);
+        }
+        if level != max_level {
+            do_level(level + 1, max_level, t, cube, hash);
         }
     }
-    println!("level {:width$} move {} count {}", level, prev_move, count, width = (level as usize));
-    if level == max_level {
-        return;
-    }
-    // iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
-    for (t, cube) in v {
-        do_level(level + 1, max_level, t, cube, counts, hash);
-    }
+    // println!("level {:width$} move {}", level, prev_move, width = (level as usize));
 }
 
 fn main() {
@@ -78,10 +70,23 @@ fn main() {
         println!("{:?}: {:?}", x, v);
     }
     println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
+    for x in Turn::allturns() {
+        println!("{}: {}", x, (cube * x).cycles());
+    }
 
-    let counts = vec![RefCell::new(0u64); 7];
-    let hash = RefCell::new(HashSet::<Cube>::new());
-    do_level(1, 4, U1, Cube::default(), &counts, &hash);
+    let hash = RefCell::new(BTreeMap::<u128, u8>::new());
+    let mut v = vec![0usize; 7];
+    {
+        let mut muthash = hash.borrow_mut();
+        muthash.insert(cube.pack(), 0);
+    }
+    do_level(1, 6, U1, cube, &hash);
+    println!("reducing...");
+    let muthash = hash.borrow_mut();
+    for e in muthash.values() {
+        v[*e as usize] += 1;
+    }
+    println!("{:?}", v);
 }
 
 #[cfg(test)]

@@ -170,6 +170,13 @@ impl Edges {
         }
         out
     }
+    pub fn pack(&self) -> u64 {
+        let mut out = 0u64;
+        for i in 0..12 {
+            out |= (self[i].0 as u64) << (5*i);
+        }
+        out
+    }
 }
 
 macro_rules! edges {

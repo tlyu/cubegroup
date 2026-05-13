@@ -73,6 +73,9 @@ impl Cube {
     pub fn cycles(&self) -> CubeCycles {
         CubeCycles(self.0.cycles(), self.1.cycles())
     }
+    pub fn pack(&self) -> u128 {
+        self.0.pack() as u128 | (self.1.pack() as u128) << 40
+    }
 }
 
 #[derive(Debug, Default)]

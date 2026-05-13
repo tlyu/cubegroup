@@ -160,6 +160,13 @@ impl Corners {
         }
         out
     }
+    pub fn pack(&self) -> u64 {
+        let mut out = 0u64;
+        for i in 0..8 {
+            out |= ((self[i].id()|(self[i].twist()<<3)) as u64) << (5*i);
+        }
+        out
+    }
 }
 impl Display for Corners {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
