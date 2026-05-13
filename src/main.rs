@@ -21,6 +21,7 @@ fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &R
 }
 
 fn main() {
+    use std::time::Instant;
     use Turn::*;
     let corners = Corners::default();
     println!("default corners: {corners}");
@@ -34,14 +35,14 @@ fn main() {
     println!("sledge cycles: {}", corners.turns(&[R3, F1, R1, F3]).cycles());
     println!("double sledge cycles: {}", corners.turns(&[R3, F1, R1, F3, R3, F1, R1, F3]).cycles());
 
-    let edges = Edges::default();
+    let edges = edges_neon::Edges::default();
     println!("default edges: {edges}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{:?}: {}", t, edges * t);
         println!("{:?} cycles: {}", t, (edges * t).cycles());
     }
-    println!("sledge: {}", edges.turns(&[R3, F1, R1, F3]));
-    println!("sledge cycles: {}", edges.turns(&[R3, F1, R1, F3]).cycles());
+    println!("sledge: {}", edges * &Turns::from(&[R3, F1, R1, F3]));
+    println!("sledge cycles: {}", (edges * &"R' F R F'".parse::<Turns>().unwrap()).cycles());
 
     let cube = Cube::default();
     println!("default cube: {cube}");
@@ -74,6 +75,7 @@ fn main() {
         println!("{}: {}", x, (cube * x).cycles());
     }
 
+    let now = Instant::now();
     let hash = RefCell::new(BTreeMap::<u128, u8>::new());
     let mut v = vec![0usize; 7];
     {
@@ -87,6 +89,7 @@ fn main() {
         v[*e as usize] += 1;
     }
     println!("{:?}", v);
+    println!("{:.2?}", now.elapsed());
 }
 
 #[cfg(test)]

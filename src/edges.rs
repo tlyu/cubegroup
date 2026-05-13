@@ -4,8 +4,8 @@ use std::ops::{Mul, Not};
 
 use crate::{Turn, Turns};
 
-mod edges_array;
-mod edges_neon;
+pub mod edges_array;
+pub mod edges_neon;
 
 pub use edges_array::*;
 

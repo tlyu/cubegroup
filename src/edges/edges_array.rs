@@ -8,7 +8,7 @@ use super::*;
 
 // Lower 4 bits for id, bit 4 for flip
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
-pub struct Edge(u8);
+pub struct Edge(pub(crate) u8);
 impl Display for Edge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let (id, flip) = (self.0 as usize & 0x0f, (self.0 as usize & 0x10) >> 4);
@@ -17,7 +17,7 @@ impl Display for Edge {
     }
 }
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct Edges([Edge; 12]);
+pub struct Edges(pub(crate) [Edge; 12]);
 static EDGES_SINGMASTER: [&str; 12] = [
     "UB", "UR", "UF", "UL",
     "BL", "BR", "FR", "FL",
