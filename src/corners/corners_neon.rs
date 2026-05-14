@@ -135,14 +135,14 @@ impl CornersTrait<corners_array::CornerCycles> for Corners {
     }
     fn pack(&self) -> u64 {
         let a = unsafe { Load8x8 { a: self.0 } .q };
-        let mut out = a & ((1 << 5) - 1);
-        out |= (a >> 5) & ((1 << 10) - 1);
-        out |= (a >> 10) & ((1 << 15) - 1);
-        out |= (a >> 15) & ((1 << 20) - 1);
-        out |= (a >> 20) & ((1 << 25) - 1);
-        out |= (a >> 25) & ((1 << 30) - 1);
-        out |= (a >> 30) & ((1 << 35) - 1);
-        out |= (a >> 35) & ((1 << 40) - 1);
+        let mut out = a & 0x1f;
+        out |= (a >> 8) & (0x1f << 5);
+        out |= (a >> 16) & (0x1f << 10);
+        out |= (a >> 24) & (0x1f << 15);
+        out |= (a >> 32) & (0x1f << 20);
+        out |= (a >> 40) & (0x1f << 25);
+        out |= (a >> 48) & (0x1f << 30);
+        out |= (a >> 56) & (0x1f << 35);
         out
     }
 }
