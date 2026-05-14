@@ -9,9 +9,9 @@ use super::*;
 pub struct Corner(pub(crate) u8);
 impl Corner {
     fn id(&self) -> u8 { self.0 & 0x07 }
-    fn twist(&self) -> u8 { (self.0 & 0x30) >> 4 }
+    fn twist(&self) -> u8 { (self.0 & 0x18) >> 3 }
     fn dotwist(&self, t: u8) -> Self {
-        Corner(self.id() | (((self.twist() + t) % 3) << 4))
+        Corner(self.id() | (((self.twist() + t) % 3) << 3))
     }
     fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
 }
@@ -156,7 +156,7 @@ impl CornersTrait<CornerCycles> for Corners {
     fn pack(&self) -> u64 {
         let mut out = 0u64;
         for i in 0..8 {
-            out |= ((self[i].id()|(self[i].twist()<<3)) as u64) << (5*i);
+            out |= (self[i].0 as u64) << (5*i);
         }
         out
     }
@@ -197,7 +197,7 @@ impl IndexMut<u8> for Corners {
 macro_rules! corners {
     ( $(($id:expr, $tw:expr)),* ) => {
         Corners([
-            $( Corner($id | ($tw << 4)), )*
+            $( Corner($id | ($tw << 3)), )*
         ])
     }
 }

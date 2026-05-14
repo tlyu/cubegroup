@@ -9,18 +9,18 @@ use crate::simd_util::*;
 use crate::{Turn, Turns};
 
 const CP_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x0707070707070707 } .a };
-const CO_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x3030303030303030 } .a };
-const CO_ADJ: uint8x8_t = unsafe { Load8x8 { q: 0x1010101010101010 } .a };
-const CO_OVF_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x4040404040404040 } .a};
+const CO_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x1818181818181818 } .a };
+const CO_ADJ: uint8x8_t = unsafe { Load8x8 { q: 0x0808080808080808 } .a };
+const CO_OVF_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x2020202020202020 } .a};
 const CORNERS_IDENT: uint8x8_t = unsafe { Load8x8 { q: 0x0706050403020100 } .a };
 // SIMD table lookups will trash the upper bits; clear them for compares
-const CMP_MASK: u64 = 0x3737373737373737;
+const CMP_MASK: u64 = 0x1f1f1f1f1f1f1f1f;
 
 macro_rules! corners {
     ($(($id:expr, $twist:expr)),*) => {
         Corners(unsafe {
             Load8x8 { b: [
-                $( $id | ($twist << 4) ),*
+                $( $id | ($twist << 3) ),*
             ] } .a
         })
     }
@@ -68,10 +68,10 @@ impl Not for Corners {
         let a = unsafe { Load8x8 { a: self.0 } .b };
         for i in 0..NCORNERS {
             let slot = a[i] as usize & 0x07;
-            let mut twist = a[i] & 0x30;
+            let mut twist = a[i] & 0x18;
             // Negate twist mod 3
             if twist != 0x00 {
-                twist ^= 0x30;
+                twist ^= 0x18;
             }
             unsafe { out.b[slot] = i as u8 | twist };
         }
@@ -150,7 +150,7 @@ impl CornersTrait<corners_array::CornerCycles> for Corners {
         let mut out = 0u64;
         let a = unsafe { Load8x8 { a: self.0 } .b };
         for i in 0..NCORNERS {
-            out |= ((a[i] & 0x07 | ((a[i] >> 1) & 0x18)) as u64) << (5 * i);
+            out |= (a[i] as u64) << (5 * i);
         }
         out
     }
