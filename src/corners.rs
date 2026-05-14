@@ -6,11 +6,6 @@ pub mod corners_array;
 pub mod corners_neon;
 use crate::{Turn, Turns};
 
-#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-pub use corners_neon::*;
-#[cfg(not(all(target_arch = "aarch64", target_feature = "neon")))]
-pub use corners_array::*;
-
 pub const NCORNERS: usize = 8;
 
 pub trait CornersTrait

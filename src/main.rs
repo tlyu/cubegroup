@@ -91,22 +91,34 @@ fn main() {
     }
 
     println!("bare DFS...");
-    for i in 0..7 {
+    #[cfg(debug_assertions)]
+    let max = 7;
+    #[cfg(not(debug_assertions))]
+    let max = 9;
+    let mut total = 0u64;
+    for i in 0..max {
         let now = Instant::now();
         let mut count = 0u64;
         dfs(i, None, cube, &mut || { count = count + 1; });
-        println!("level {} count {} {:.2?}", i+1, count, now.elapsed());
+        total += count;
+        let elapsed = now.elapsed();
+        let rate = total as f32 / elapsed.as_micros() as f32;
+        println!("level {} count {} {:.2?} ({}/µs)", i+1, count, elapsed, rate);
     }
 
+    #[cfg(debug_assertions)]
+    let max = 6;
+    #[cfg(not(debug_assertions))]
+    let max = 7;
     let now = Instant::now();
     let hash = RefCell::new(BTreeMap::<u128, u8>::new());
-    let mut v = vec![0usize; 7];
+    let mut v = vec![0usize; max+1];
     {
         let mut muthash = hash.borrow_mut();
         muthash.insert(cube.pack(), 0);
     }
     println!("counting unique positions...");
-    do_level(1, 6, U1, cube, &hash);
+    do_level(1, max as u8, U1, cube, &hash);
     println!("reducing...");
     let muthash = hash.borrow_mut();
     for e in muthash.values() {

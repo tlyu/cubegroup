@@ -9,6 +9,11 @@ mod turns;
 pub use turns::*;
 pub(crate) mod simd_util;
 
+#[cfg(all(not(feature = "array"), target_arch = "aarch64", target_feature = "neon"))]
+pub use {corners_neon::*, edges_neon::*};
+#[cfg(feature = "array")]
+pub use {corners_array::*, edges_array::*};
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
