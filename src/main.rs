@@ -76,10 +76,6 @@ fn main() {
     println!("{t}: {}", cube * &t);
     println!("{t}: {}", (cube * &t).cycles());
 
-    for x in [U1, U2, R1, F1, D1, L1, B1] {
-        let v: Vec<_> = x.into_iter().collect();
-        println!("{:?}: {:?}", x, v);
-    }
     println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
     for x in Turn::allturns() {
         println!("{}: {}", x, (cube * x).cycles());
@@ -166,5 +162,22 @@ mod tests {
         let corners = corners_neon::Corners::default();
         let s = corners * &Turns::from(&[R1, U1, R3, U3]);
         assert_eq!(s * s, corners * &Turns::from(&[R1, U1, R3, U3, R1, U1, R3, U3]));
+    }
+
+    #[test]
+    fn test_turns() {
+        let a = [
+            ([U1, U2, U3], vec![R1, R2, R3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([R1, R2, R3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([F1, F2, F3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([D1, D2, D3], vec![R1, R2, R3, F1, F2, F3, L1, L2, L3, B1, B2, B3]),
+            ([L1, L2, L3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, B1, B2, B3]),
+            ([B1, B2, B3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3]),
+        ];
+        for (turns, seq) in a {
+            for t in turns {
+                assert_eq!(t.into_iter().collect::<Vec<_>>(), seq);
+            }
+        }
     }
 }

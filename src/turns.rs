@@ -12,7 +12,7 @@ enum Axis {
     Y, X, Z,
 }
 #[allow(unused)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum Turn {
     U1 = 0,
