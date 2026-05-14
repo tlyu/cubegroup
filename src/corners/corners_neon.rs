@@ -78,26 +78,31 @@ impl Not for Corners {
         Corners(unsafe { out.a })
     }
 }
+// Use target_feature to avoid annotating everything as unsafe
+#[target_feature(enable = "neon")]
+fn unsafe_mul(a: Corners, b: Corners) -> Corners {
+    let mut out = vtbl1_u8(a.0, vand_u8(b.0, CP_MASK));
+
+    // Trick from Joba's cubelib to avoid remainder ops.
+    // This requires a spare bit for the orientation field.
+
+    // Add 1 to each corner orientation, so modulo 3 wrap will give 0b1xx
+    let co = vadd_u8(vand_u8(b.0, CO_MASK), CO_ADJ);
+    out = vadd_u8(out, co);
+    // All the overflow bits, giving 4 for each overflow
+    let ovf = vand_u8(out, CO_OVF_MASK);
+    // Negate overflow bits and shift right, giving 1 for each non-overflow
+    let novf = vshr_n_u8::<2>(vand_u8(vmvn_u8(ovf), CO_OVF_MASK));
+
+    // Subtract the orientation adjustments.
+    // This undoes the original +1 adjustment, and corrects overflows.
+    out = vsub_u8(out, vorr_u8(ovf, novf));
+    Corners(out)
+}
 impl Mul for Corners {
     type Output = Corners;
     fn mul(self, rhs: Self) -> Corners {
-        let mut out = unsafe { vtbl1_u8(self.0, vand_u8(rhs.0, CP_MASK))};
- 
-        // Trick from Joba's cubelib to avoid remainder ops.
-        // This requires a spare bit for the orientation field.
-
-        // Add 1 to each corner orientation, so modulo 3 wrap will give 0b1xx
-        let co = unsafe { vadd_u8(vand_u8(rhs.0, CO_MASK), CO_ADJ) };
-        out = unsafe { vadd_u8(out, co) };
-        // All the overflow bits, giving 4 for each overflow
-        let ovf = unsafe { vand_u8(out, CO_OVF_MASK) };
-        // Negate overflow bits and shift right, giving 1 for each non-overflow
-        let novf = unsafe { vshr_n_u8::<2>(vand_u8(vmvn_u8(ovf), CO_OVF_MASK)) };
-
-        // Subtract the orientation adjustments.
-        // This undoes the original +1 adjustment, and corrects overflows.
-        out = unsafe { vsub_u8(out, vorr_u8(ovf, novf)) };
-        Corners(out)
+        unsafe { unsafe_mul(self, rhs) }
     }
 }
 impl Mul<&Corners> for &Corners {
