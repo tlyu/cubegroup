@@ -23,7 +23,7 @@ fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &R
 fn main() {
     use std::time::Instant;
     use Turn::*;
-    let corners = Corners::default();
+    let corners = corners_neon::Corners::default();
     println!("default corners: {corners}");
     for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
         println!("{}: {}", t, corners * t);
@@ -31,9 +31,9 @@ fn main() {
     }
     let s = "R";
     println!("{s}: {}", (corners * Turn::from_str(s).unwrap()).cycles());
-    println!("sledge: {}", corners.turns(&[R3, F1, R1, F3]));
-    println!("sledge cycles: {}", corners.turns(&[R3, F1, R1, F3]).cycles());
-    println!("double sledge cycles: {}", corners.turns(&[R3, F1, R1, F3, R3, F1, R1, F3]).cycles());
+    println!("sledge: {}", corners * &Turns::from(&[R3, F1, R1, F3]));
+    println!("sledge cycles: {}", (corners * &Turns::from(&[R3, F1, R1, F3])).cycles());
+    println!("double sledge cycles: {}", (corners * &Turns::from(&[R3, F1, R1, F3, R3, F1, R1, F3])).cycles());
 
     let edges = edges_neon::Edges::default();
     println!("default edges: {edges}");
@@ -99,8 +99,8 @@ mod tests {
 
     #[test]
     fn test_inverses() {
-        let corners = Corners::default();
-        let edges = Edges::default();
+        let corners = corners_neon::Corners::default();
+        let edges = edges_neon::Edges::default();
         let cube = Cube::default();
         for (lhs, rhs) in [
             (U1, U3), (U2, U2), (U3, U1),
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn test_parity() {
         let corners = corners_neon::Corners::default();
-        let edges = Edges::default();
+        let edges = edges_neon::Edges::default();
         for (lhs, rhs) in [
             (U1, true), (U2, false), (U3, true),
             (R1, true), (R2, false), (R3, true),
