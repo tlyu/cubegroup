@@ -9,6 +9,9 @@ mod turns;
 pub use turns::*;
 pub(crate) mod simd_util;
 
+use corners_array::CornerCycles;
+use edges_array::EdgeCycles;
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {

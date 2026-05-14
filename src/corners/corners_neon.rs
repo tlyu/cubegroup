@@ -139,11 +139,11 @@ impl Mul<&Turns> for &Corners {
         *self * rhs
     }
 }
-impl CornersTrait<CornerCycles> for Corners {
+impl CornersTrait<corners_array::CornerCycles> for Corners {
     fn parity(&self) -> bool {
         corners_array::Corners::from(*self).parity()
     }
-    fn cycles(&self) -> CornerCycles {
+    fn cycles(&self) -> corners_array::CornerCycles {
         corners_array::Corners::from(*self).cycles()
     }
     fn pack(&self) -> u64 {

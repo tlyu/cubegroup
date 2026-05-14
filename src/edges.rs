@@ -7,6 +7,9 @@ use crate::{Turn, Turns};
 pub mod edges_array;
 pub mod edges_neon;
 
+#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
+pub use edges_neon::*;
+#[cfg(not(all(target_arch = "aarch64", target_feature = "neon")))]
 pub use edges_array::*;
 
 const NEDGES: usize = 12;

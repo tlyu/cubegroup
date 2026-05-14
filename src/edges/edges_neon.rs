@@ -113,11 +113,11 @@ impl From<Edges> for edges_array::Edges {
         edges_array::Edges(out)
     }
 }
-impl EdgesTrait<EdgeCycles> for Edges {
+impl EdgesTrait<edges_array::EdgeCycles> for Edges {
     fn parity(&self) -> bool {
         edges_array::Edges::from(*self).parity()
     }
-    fn cycles(&self) -> EdgeCycles {
+    fn cycles(&self) -> edges_array::EdgeCycles {
         edges_array::Edges::from(*self).cycles()
     }
     fn pack(&self) -> u64 {
