@@ -20,6 +20,21 @@ fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &R
     // println!("level {:width$} move {}", level, prev_move, width = (level as usize));
 }
 
+fn dfs<F: FnMut() -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f: &mut F) {
+    let iter = match prev_move {
+        Some(x) => { x.into_iter() },
+        None => { Turn::allturns() },
+    };
+    for t in iter {
+        let cube = prev_cube * t;
+        if level != 0 {
+            dfs(level - 1, Some(t), cube, f);
+        } else {
+            f();
+        }
+    }
+}
+
 fn main() {
     use std::time::Instant;
     use Turn::*;
@@ -75,6 +90,14 @@ fn main() {
         println!("{}: {}", x, (cube * x).cycles());
     }
 
+    println!("bare DFS...");
+    for i in 0..7 {
+        let now = Instant::now();
+        let mut count = 0u64;
+        dfs(i, None, cube, &mut || { count = count + 1; });
+        println!("level {} count {} {:.2?}", i+1, count, now.elapsed());
+    }
+
     let now = Instant::now();
     let hash = RefCell::new(BTreeMap::<u128, u8>::new());
     let mut v = vec![0usize; 7];
@@ -82,6 +105,7 @@ fn main() {
         let mut muthash = hash.borrow_mut();
         muthash.insert(cube.pack(), 0);
     }
+    println!("counting unique positions...");
     do_level(1, 6, U1, cube, &hash);
     println!("reducing...");
     let muthash = hash.borrow_mut();
