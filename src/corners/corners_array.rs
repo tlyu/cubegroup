@@ -154,10 +154,14 @@ impl CornersTrait<CornerCycles> for Corners {
         out
     }
     fn pack(&self) -> u64 {
-        let mut out = 0u64;
-        for i in 0..8 {
-            out |= (self[i].0 as u64) << (5*i);
-        }
+        let mut out = self[0].0 as u64;
+        out |= (self[1].0 as u64) << 5;
+        out |= (self[2].0 as u64) << 10;
+        out |= (self[3].0 as u64) << 15;
+        out |= (self[4].0 as u64) << 20;
+        out |= (self[5].0 as u64) << 25;
+        out |= (self[6].0 as u64) << 30;
+        out |= (self[7].0 as u64) << 35;
         out
     }
 }
