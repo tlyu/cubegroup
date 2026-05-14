@@ -9,9 +9,6 @@ mod turns;
 pub use turns::*;
 pub(crate) mod simd_util;
 
-use corners_array::CornerCycles;
-use edges_array::EdgeCycles;
-
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
@@ -60,7 +57,7 @@ impl Cube {
 }
 
 #[derive(Debug, Default)]
-pub struct CubeCycles(CornerCycles, EdgeCycles);
+pub struct CubeCycles(<Corners as CornersTrait>::Cycles, <Edges as EdgesTrait>::Cycles);
 impl Display for CubeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{}{}", self.0, self.1)
