@@ -121,11 +121,19 @@ impl EdgesTrait<edges_array::EdgeCycles> for Edges {
         edges_array::Edges::from(*self).cycles()
     }
     fn pack(&self) -> u64 {
-        let mut out = 0u64;
-        let a = unsafe { Load8x16 { a: self.0 } .b };
-        for i in 0..NEDGES {
-            out |= (a[i] as u64) << (5 * i);
-        }
-        out
+        let a = unsafe { Load8x16 { a: self.0 } .qq };
+        let mut out = a & ((1 << 5) - 1);
+        out |= (a >> 5) & ((1 << 10) - 1);
+        out |= (a >> 10) & ((1 << 15) - 1);
+        out |= (a >> 15) & ((1 << 20) - 1);
+        out |= (a >> 20) & ((1 << 25) - 1);
+        out |= (a >> 25) & ((1 << 30) - 1);
+        out |= (a >> 30) & ((1 << 35) - 1);
+        out |= (a >> 35) & ((1 << 40) - 1);
+        out |= (a >> 40) & ((1 << 45) - 1);
+        out |= (a >> 45) & ((1 << 50) - 1);
+        out |= (a >> 50) & ((1 << 55) - 1);
+        out |= (a >> 55) & ((1 << 60) - 1);
+        out as u64
     }
 }
