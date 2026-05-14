@@ -13,12 +13,13 @@ pub use corners_array::*;
 
 pub const NCORNERS: usize = 8;
 
-pub trait CornersTrait<T: CornerCyclesTrait>
+pub trait CornersTrait
     where Self: Clone + Copy + Debug + Display + Eq + Mul + Mul<Turn>
         + for<'a> Mul<&'a Turns> + Not + PartialEq + Sized,
 {
+    type Cycles: CornerCyclesTrait;
     fn parity(&self) -> bool;
-    fn cycles(&self) -> T;
+    fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
 }
 pub trait CornerCyclesTrait: Debug + Display {}

@@ -95,7 +95,8 @@ impl From<Edges> for edges_array::Edges {
         edges_array::Edges(out)
     }
 }
-impl EdgesTrait<edges_array::EdgeCycles> for Edges {
+impl EdgesTrait for Edges {
+    type Cycles = edges_array::EdgeCycles;
     fn parity(&self) -> bool {
         edges_array::Edges::from(*self).parity()
     }

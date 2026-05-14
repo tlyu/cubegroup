@@ -80,7 +80,8 @@ impl Not for Corners {
         out
     }
 }
-impl CornersTrait<CornerCycles> for Corners {
+impl CornersTrait for Corners {
+    type Cycles = CornerCycles;
     fn parity(&self) -> bool {
         let mut unseen = 0xffu8;
         let mut i = 0u8;

@@ -92,7 +92,8 @@ impl Not for Edges {
         out
     }
 }
-impl EdgesTrait<EdgeCycles> for Edges {
+impl EdgesTrait for Edges {
+    type Cycles = EdgeCycles;
     fn parity(&self) -> bool {
         let mut unseen = 0xfffu16;
         let mut i = 0u8;

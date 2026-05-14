@@ -14,13 +14,14 @@ pub use edges_array::*;
 
 const NEDGES: usize = 12;
 
-pub trait EdgesTrait<T: EdgeCyclesTrait>
+pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display
         + Eq + Hash + Mul + Mul<Turn> + Not + PartialEq + Sized,
         for<'a> Self: Mul<&'a Turns>
 {
+    type Cycles: EdgeCyclesTrait;
     fn parity(&self) -> bool;
-    fn cycles(&self) -> T;
+    fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
 }
 pub trait EdgeCyclesTrait: Debug + Display {}

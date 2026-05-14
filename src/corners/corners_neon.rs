@@ -108,7 +108,8 @@ impl Mul<&Turns> for Corners {
         out
     }
 }
-impl CornersTrait<corners_array::CornerCycles> for Corners {
+impl CornersTrait for Corners {
+    type Cycles = corners_array::CornerCycles;
     fn parity(&self) -> bool {
         corners_array::Corners::from(*self).parity()
     }
