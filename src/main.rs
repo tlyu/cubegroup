@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_parity() {
-        let corners = Corners::default();
+        let corners = corners_neon::Corners::default();
         let edges = Edges::default();
         for (lhs, rhs) in [
             (U1, true), (U2, false), (U3, true),
@@ -131,13 +131,13 @@ mod tests {
                 assert_eq!((corners * lhs).parity(), rhs);
                 assert_eq!((edges * lhs).parity(), rhs);
         }
-        assert!(!(corners.turns(&[R3, F1, R1, F3])).parity());
+        assert!(!(corners * &Turns::from(&[R3, F1, R1, F3])).parity());
     }
 
     #[test]
     fn test_mul() {
-        let corners = Corners::default();
-        let s = corners.turns(&[R1, U1, R3, U3]);
-        assert_eq!(s * s, corners.turns(&[R1, U1, R3, U3, R1, U1, R3, U3]));
+        let corners = corners_neon::Corners::default();
+        let s = corners * &Turns::from(&[R1, U1, R3, U3]);
+        assert_eq!(s * s, corners * &Turns::from(&[R1, U1, R3, U3, R1, U1, R3, U3]));
     }
 }

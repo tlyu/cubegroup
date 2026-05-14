@@ -4,14 +4,10 @@ use std::fmt::{self, Display};
 use std::hash::Hasher;
 use std::ops::{Mul, Not};
 
-use crate::{Turn, Turns};
 use super::*;
+use crate::simd_util::*;
+use crate::{Turn, Turns};
 
-union Load8x16 {
-    a: uint8x16_t,
-    b: [u8; 16],
-    qq: u128,
-}
 const EP_MASK: uint8x16_t = unsafe { Load8x16 { qq: 0x0f0f0f0f0f0f0f0f0f0f0f0f } .a };
 const EO_MASK: uint8x16_t = unsafe { Load8x16 { qq: 0x101010101010101010101010 } .a };
 const EDGES_IDENT: uint8x16_t = unsafe { Load8x16 { qq: 0x0b0a09080706050403020100 } .a };

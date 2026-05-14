@@ -1,9 +1,12 @@
 use std::fmt::{Debug, Display};
 use std::ops::{Mul, Not};
 
-mod corners_array;
+pub mod corners_array;
 pub use corners_array::*;
+pub mod corners_neon;
 use crate::{Turn, Turns};
+
+pub const NCORNERS: usize = 8;
 
 pub trait CornersTrait<T: CornerCyclesTrait>
     where Self: Clone + Copy + Debug + Display + Eq + Mul + Mul<Turn>

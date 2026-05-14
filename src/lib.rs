@@ -7,6 +7,7 @@ mod edges;
 pub use edges::*;
 mod turns;
 pub use turns::*;
+pub(crate) mod simd_util;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube(Corners, Edges);
