@@ -1,18 +1,13 @@
-use std::cell::RefCell;
 use std::collections::BTreeMap;
-// use std::collections::btree_map::Entry;
 use std::str::FromStr;
 
 use cube_foo::*;
 
-fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &RefCell<BTreeMap<u128, u8>>) {
+fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &mut BTreeMap<u128, u8>) {
     let iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
     for t in iter {
         let cube = prev_cube * t;
-        {
-            let mut muthash = hash.borrow_mut();
-            muthash.entry(cube.pack()).and_modify(|x| *x = level.min(*x)).or_insert(level);
-        }
+        hash.entry(cube.pack()).and_modify(|x| *x = level.min(*x)).or_insert(level);
         if level != max_level {
             do_level(level + 1, max_level, t, cube, hash);
         }
@@ -103,7 +98,7 @@ fn main() {
         total += count;
         let elapsed = now.elapsed();
         let rate = total as f32 / elapsed.as_micros() as f32;
-        println!("level {} count {} {:.2?} ({}/µs)", i+1, count, elapsed, rate);
+        println!("level {} count {} {:.2?} ({:.2}M/s)", i+1, count, elapsed, rate);
     }
 
     #[cfg(debug_assertions)]
@@ -111,17 +106,13 @@ fn main() {
     #[cfg(not(debug_assertions))]
     let max = 7;
     let now = Instant::now();
-    let hash = RefCell::new(BTreeMap::<u128, u8>::new());
+    let mut hash = BTreeMap::<u128, u8>::new();
     let mut v = vec![0usize; max+1];
-    {
-        let mut muthash = hash.borrow_mut();
-        muthash.insert(cube.pack(), 0);
-    }
+    hash.insert(cube.pack(), 0);
     println!("counting unique positions...");
-    do_level(1, max as u8, U1, cube, &hash);
+    do_level(1, max as u8, U1, cube, &mut hash);
     println!("reducing...");
-    let muthash = hash.borrow_mut();
-    for e in muthash.values() {
+    for e in hash.values() {
         v[*e as usize] += 1;
     }
     println!("{:?}", v);
