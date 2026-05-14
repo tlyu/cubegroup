@@ -119,13 +119,13 @@ impl CornersTrait for Corners {
     fn pack(&self) -> u64 {
         let a = unsafe { Load8x8 { a: self.0 } .q };
         let mut out = a & 0x1f;
-        out |= (a >> 8) & (0x1f << 5);
-        out |= (a >> 16) & (0x1f << 10);
-        out |= (a >> 24) & (0x1f << 15);
-        out |= (a >> 32) & (0x1f << 20);
-        out |= (a >> 40) & (0x1f << 25);
-        out |= (a >> 48) & (0x1f << 30);
-        out |= (a >> 56) & (0x1f << 35);
+        out |= (a >> 3) & (0x1f << 5);
+        out |= (a >> 6) & (0x1f << 10);
+        out |= (a >> 9) & (0x1f << 15);
+        out |= (a >> 12) & (0x1f << 20);
+        out |= (a >> 15) & (0x1f << 25);
+        out |= (a >> 18) & (0x1f << 30);
+        out |= (a >> 21) & (0x1f << 35);
         out
     }
 }

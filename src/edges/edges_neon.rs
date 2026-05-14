@@ -106,17 +106,17 @@ impl EdgesTrait for Edges {
     fn pack(&self) -> u64 {
         let a = unsafe { Load8x16 { a: self.0 } .qq };
         let mut out = a & 0x1f;
-        out |= (a >> 8) & (0x1f << 5);
-        out |= (a >> 16) & (0x1f << 10);
-        out |= (a >> 24) & (0x1f << 15);
-        out |= (a >> 32) & (0x1f << 20);
-        out |= (a >> 40) & (0x1f << 25);
-        out |= (a >> 48) & (0x1f << 30);
-        out |= (a >> 56) & (0x1f << 35);
-        out |= (a >> 64) & (0x1f << 40);
-        out |= (a >> 72) & (0x1f << 45);
-        out |= (a >> 80) & (0x1f << 50);
-        out |= (a >> 96) & (0x1f << 55);
+        out |= (a >> 3) & (0x1f << 5);
+        out |= (a >> 6) & (0x1f << 10);
+        out |= (a >> 9) & (0x1f << 15);
+        out |= (a >> 12) & (0x1f << 20);
+        out |= (a >> 15) & (0x1f << 25);
+        out |= (a >> 18) & (0x1f << 30);
+        out |= (a >> 21) & (0x1f << 35);
+        out |= (a >> 24) & (0x1f << 40);
+        out |= (a >> 27) & (0x1f << 45);
+        out |= (a >> 30) & (0x1f << 50);
+        out |= (a >> 33) & (0x1f << 55);
         out as u64
     }
 }
