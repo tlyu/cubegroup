@@ -146,4 +146,12 @@ impl CornersTrait<CornerCycles> for Corners {
     fn cycles(&self) -> CornerCycles {
         corners_array::Corners::from(*self).cycles()
     }
+    fn pack(&self) -> u64 {
+        let mut out = 0u64;
+        let a = unsafe { Load8x8 { a: self.0 } .b };
+        for i in 0..NCORNERS {
+            out |= ((a[i] & 0x07 | ((a[i] >> 1) & 0x18)) as u64) << (5 * i);
+        }
+        out
+    }
 }

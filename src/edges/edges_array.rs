@@ -165,19 +165,19 @@ impl EdgesTrait<EdgeCycles> for Edges {
         }
         out
     }
+    fn pack(&self) -> u64 {
+        let mut out = 0u64;
+        for i in 0..12 {
+            out |= (self[i].0 as u64) << (5*i);
+        }
+        out
+    }
 }
 impl Edges {
     pub fn turns(&self, t: &[Turn]) -> Edges {
         let mut out = *self;
         for x in t {
             out = out * *x;
-        }
-        out
-    }
-    pub fn pack(&self) -> u64 {
-        let mut out = 0u64;
-        for i in 0..12 {
-            out |= (self[i].0 as u64) << (5*i);
         }
         out
     }

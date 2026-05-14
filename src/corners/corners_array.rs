@@ -153,6 +153,13 @@ impl CornersTrait<CornerCycles> for Corners {
         }
         out
     }
+    fn pack(&self) -> u64 {
+        let mut out = 0u64;
+        for i in 0..8 {
+            out |= ((self[i].id()|(self[i].twist()<<3)) as u64) << (5*i);
+        }
+        out
+    }
 }
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }
@@ -160,13 +167,6 @@ impl Corners {
         let mut out = *self;
         for x in t {
             out = out * *x;
-        }
-        out
-    }
-    pub fn pack(&self) -> u64 {
-        let mut out = 0u64;
-        for i in 0..8 {
-            out |= ((self[i].id()|(self[i].twist()<<3)) as u64) << (5*i);
         }
         out
     }

@@ -18,6 +18,7 @@ pub trait CornersTrait<T: CornerCyclesTrait>
 {
     fn parity(&self) -> bool;
     fn cycles(&self) -> T;
+    fn pack(&self) -> u64;
 }
 pub trait CornerCyclesTrait: Debug + Display {}
 

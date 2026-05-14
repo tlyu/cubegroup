@@ -20,6 +20,7 @@ pub trait EdgesTrait<T: EdgeCyclesTrait>
 {
     fn parity(&self) -> bool;
     fn cycles(&self) -> T;
+    fn pack(&self) -> u64;
 }
 pub trait EdgeCyclesTrait: Debug + Display {}
 
