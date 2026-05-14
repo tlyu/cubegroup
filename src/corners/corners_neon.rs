@@ -92,22 +92,10 @@ impl Mul for Corners {
         unsafe { unsafe_mul(self, rhs) }
     }
 }
-impl Mul<&Corners> for &Corners {
-    type Output = Corners;
-    fn mul(self, rhs: &Corners) -> Corners {
-        *self * *rhs
-    }
-}
 impl Mul<Turn> for Corners {
     type Output = Corners;
     fn mul(self, rhs: Turn) -> Corners {
         self * CORNER_TURNS[rhs]
-    }
-}
-impl Mul<Turn> for &Corners {
-    type Output = Corners;
-    fn mul(self, rhs: Turn) -> Corners {
-        *self * rhs
     }
 }
 impl Mul<&Turns> for Corners {
@@ -118,12 +106,6 @@ impl Mul<&Turns> for Corners {
             out = out * *x;
         }
         out
-    }
-}
-impl Mul<&Turns> for &Corners {
-    type Output = Corners;
-    fn mul(self, rhs: &Turns) -> Corners {
-        *self * rhs
     }
 }
 impl CornersTrait<corners_array::CornerCycles> for Corners {

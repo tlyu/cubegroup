@@ -25,19 +25,11 @@ impl Mul for Cube {
         Cube(self.0 * rhs.0, self.1 * rhs.1)
     }
 }
-impl Mul<&Cube> for &Cube {
-    type Output = Cube;
-    fn mul(self, rhs: &Cube) -> Cube { *self * *rhs }
-}
 impl Mul<Turn> for Cube {
     type Output = Cube;
     fn mul(self, rhs: Turn) -> Cube {
         Cube(self.0 * rhs, self.1 * rhs)
     }
-}
-impl Mul<Turn> for &Cube {
-    type Output = Cube;
-    fn mul(self, rhs: Turn) -> Cube { *self * rhs }
 }
 impl Mul<&Turns> for Cube {
     type Output = Cube;
@@ -45,21 +37,11 @@ impl Mul<&Turns> for Cube {
         Cube(self.0 * rhs, self.1 * rhs)
     }
 }
-impl Mul<&Turns> for &Cube {
-    type Output = Cube;
-    fn mul(self, rhs: &Turns) -> Cube {
-        *self * rhs
-    }
-}
 impl Not for Cube {
     type Output = Cube;
     fn not(self) -> Cube {
         Cube(!self.0, !self.1)
     }
-}
-impl Not for &Cube {
-    type Output = Cube;
-    fn not(self) -> Cube { !*self }
 }
 impl Cube {
     pub fn turns(&self, t: &[Turn]) -> Cube {

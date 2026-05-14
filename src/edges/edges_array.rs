@@ -65,22 +65,10 @@ impl Mul for Edges {
         Edges(rhs.0.map(|x| Edge(self[x.0 & 0xf].0 ^ (x.0 & 0x10))))
     }
 }
-impl<'a> Mul<&'a Edges> for &'a Edges{
-    type Output = Edges;
-    fn mul(self, rhs: Self) -> Edges {
-        *self * *rhs
-    }
-}
 impl Mul<Turn> for Edges {
     type Output = Edges;
     fn mul(self, rhs: Turn) -> Edges {
         self * EDGE_TURNS[rhs]
-    }
-}
-impl Mul<Turn> for &Edges {
-    type Output = Edges;
-    fn mul(self, rhs: Turn) -> Edges {
-        *self * rhs
     }
 }
 impl Mul<&Turns> for Edges {
@@ -93,12 +81,6 @@ impl Mul<&Turns> for Edges {
         out
     }
 }
-impl Mul<&Turns> for &Edges {
-    type Output = Edges;
-    fn mul(self, rhs: &Turns) -> Edges {
-        *self * rhs
-    }
-}
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Self {
@@ -109,10 +91,6 @@ impl Not for Edges {
         }
         out
     }
-}
-impl Not for &Edges {
-    type Output = Edges;
-    fn not(self) -> Edges { !*self }
 }
 impl EdgesTrait<EdgeCycles> for Edges {
     fn parity(&self) -> bool {

@@ -52,22 +52,10 @@ impl Mul for Corners {
         Corners(rhs.0.map(|x| self[x.id()].dotwist(x.twist())))
     }
 }
-impl<'a> Mul<&'a Corners> for &'a Corners {
-    type Output = Corners;
-    fn mul(self, rhs: Self) -> Corners {
-        *self * *rhs
-    }
-}
 impl Mul<Turn> for Corners {
     type Output = Corners;
     fn mul(self, rhs: Turn) -> Corners {
         self * CORNER_TURNS[rhs]
-    }
-}
-impl<'a> Mul<Turn> for &'a Corners {
-    type Output = Corners;
-    fn mul(self, rhs: Turn) -> Corners {
-        *self * rhs
     }
 }
 impl Mul<&Turns> for Corners {
@@ -78,12 +66,6 @@ impl Mul<&Turns> for Corners {
             out = out * *x;
         }
         out
-    }
-}
-impl Mul<&Turns> for &Corners {
-    type Output = Corners;
-    fn mul(self, rhs: &Turns) -> Corners {
-        *self * rhs
     }
 }
 impl Not for Corners {
@@ -97,10 +79,6 @@ impl Not for Corners {
         }
         out
     }
-}
-impl Not for &Corners {
-    type Output = Corners;
-    fn not(self) -> Corners { !*self }
 }
 impl CornersTrait<CornerCycles> for Corners {
     fn parity(&self) -> bool {
