@@ -2,7 +2,7 @@ use std::collections::{HashSet};
 use std::hint::black_box;
 use std::str::FromStr;
 
-use cube_foo::*;
+use cubegroup::*;
 
 fn idfs<F: FnMut(Cube) -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f: &mut F) {
     let iter = match prev_move {

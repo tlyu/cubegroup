@@ -1,7 +1,8 @@
 [package]
-name = "cube-foo"
+name = "cubegroup"
 version = "0.1.0"
 edition = "2024"
+license = "BSD-2-Clause"
 
 [dependencies]
 
