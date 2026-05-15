@@ -1,21 +1,9 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeSet};
 use std::str::FromStr;
 
 use cube_foo::*;
 
-fn do_level(level: u8, max_level: u8, prev_move: Turn, prev_cube: Cube, hash: &mut BTreeMap<u128, u8>) {
-    let iter = if level < 2 { Turn::allturns() } else { prev_move.into_iter() };
-    for t in iter {
-        let cube = prev_cube * t;
-        hash.entry(cube.pack()).and_modify(|x| *x = level.min(*x)).or_insert(level);
-        if level != max_level {
-            do_level(level + 1, max_level, t, cube, hash);
-        }
-    }
-    // println!("level {:width$} move {}", level, prev_move, width = (level as usize));
-}
-
-fn dfs<F: FnMut() -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f: &mut F) {
+fn idfs<F: FnMut(Cube) -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f: &mut F) {
     let iter = match prev_move {
         Some(x) => { x.into_iter() },
         None => { Turn::allturns() },
@@ -23,9 +11,9 @@ fn dfs<F: FnMut() -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f:
     for t in iter {
         let cube = prev_cube * t;
         if level != 0 {
-            dfs(level - 1, Some(t), cube, f);
+            idfs(level - 1, Some(t), cube, f);
         } else {
-            f();
+            f(cube);
         }
     }
 }
@@ -90,7 +78,7 @@ fn main() {
     for i in 0..max {
         let now = Instant::now();
         let mut count = 0u64;
-        dfs(i, None, cube, &mut || { count = count + 1; });
+        idfs(i, None, cube, &mut |_| { count += 1; });
         total += count;
         let elapsed = now.elapsed();
         let rate = total as f32 / elapsed.as_micros() as f32;
@@ -101,18 +89,21 @@ fn main() {
     let max = 6;
     #[cfg(not(debug_assertions))]
     let max = 7;
-    let now = Instant::now();
-    let mut hash = BTreeMap::<u128, u8>::new();
-    let mut v = vec![0usize; max+1];
-    hash.insert(cube.pack(), 0);
+    let mut total = 0u64;
+    let mut hash = BTreeSet::<u128>::new();
+    hash.insert(cube.pack());
+    let start = Instant::now();
     println!("counting unique positions...");
-    do_level(1, max as u8, U1, cube, &mut hash);
-    println!("reducing...");
-    for e in hash.values() {
-        v[*e as usize] += 1;
+    for i in 0..max {
+        let now = Instant::now();
+        let mut count = 0u64;
+        idfs(i, None, cube, &mut |x| { if hash.insert(x.pack()) { count += 1; }});
+        total += count;
+        let elapsed = now.elapsed();
+        let rate = total as f32 / elapsed.as_micros() as f32;
+        println!("level {} count {} {:.2?} ({:.2}M/s)", i+1, count, elapsed, rate)
     }
-    println!("{:?}", v);
-    println!("{:.2?}", now.elapsed());
+    println!("total elapsed {:.2?}", start.elapsed());
 }
 
 #[cfg(test)]
