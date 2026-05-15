@@ -1,4 +1,5 @@
 use std::collections::{HashSet};
+use std::hint::black_box;
 use std::str::FromStr;
 
 use cube_foo::*;
@@ -68,6 +69,19 @@ fn main() {
     for x in Turn::allturns() {
         println!("{}: {}", x, (cube * x).cycles());
     }
+
+    let s = cube * &("R U2 D' B D'".parse::<Turns>().unwrap());
+    let mut x = cube;
+    let max = 1u64 << 31;
+    println!("{} turns...", max);
+    let now = Instant::now();
+    for _ in 0..max {
+        x = x * s;
+    }
+    black_box(x);
+    let elapsed = now.elapsed();
+    let rate: f32 = max as f32 / elapsed.as_micros() as f32;
+    println!("{} turns {:.2?} {:.2}M/s", max, elapsed, rate);
 
     println!("bare DFS...");
     #[cfg(debug_assertions)]

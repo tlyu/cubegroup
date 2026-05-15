@@ -78,6 +78,7 @@ impl Not for Corners {
 }
 // Use target_feature to avoid annotating everything as unsafe
 #[target_feature(enable = "neon")]
+#[inline]
 fn unsafe_mul(a: Corners, b: Corners) -> Corners {
     let mut out = vtbl1_u8(a.0, vand_u8(b.0, CP_MASK));
     out = vadd_u8(out, vand_u8(b.0, CO_MASK));
@@ -88,12 +89,14 @@ fn unsafe_mul(a: Corners, b: Corners) -> Corners {
 }
 impl Mul for Corners {
     type Output = Corners;
+    #[inline]
     fn mul(self, rhs: Self) -> Corners {
         unsafe { unsafe_mul(self, rhs) }
     }
 }
 impl Mul<Turn> for Corners {
     type Output = Corners;
+    #[inline]
     fn mul(self, rhs: Turn) -> Corners {
         self * CORNER_TURNS[rhs]
     }

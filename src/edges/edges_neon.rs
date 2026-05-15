@@ -10,15 +10,13 @@ use crate::{Turn, Turns};
 
 const EP_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x0f; 16] } .a };
 const EO_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x10; 16] } .a };
-const EDGES_IDENT: uint8x16_t = unsafe { Load8x16 { qq: 0x0b0a09080706050403020100 } .a };
-// SIMD table lookups will trash the upper bits; clear them for compares
-const CMP_MASK: u128 = 0x1f1f1f1f1f1f1f1f1f1f1f1f;
+const EDGES_IDENT: uint8x16_t = unsafe { Load8x16 { qq: 0x0f0e0d0c0b0a09080706050403020100 } .a };
 
 macro_rules! edges {
     ( $( ($id:expr, $flip:expr) ),* ) => {
         Edges(unsafe { Load8x16 { b: [
             $( $id | ($flip << 4) ),*
-            , 0, 0, 0, 0
+            , 12, 13, 14, 15
         ]} .a })
     }
 }
@@ -41,18 +39,19 @@ impl Hash for Edges {
     fn hash<H>(&self, state: &mut H)
         where H: Hasher
     {
-        let x = unsafe { Load8x16 { a: self.0 } .qq & CMP_MASK };
+        let x = unsafe { Load8x16 { a: self.0 } .qq };
         x.hash(state)
     }
 }
 impl Eq for Edges {}
 impl PartialEq for Edges {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { Load8x16 { a: self.0 } .qq & CMP_MASK == Load8x16 { a: rhs.0 } .qq & CMP_MASK }
+        unsafe { Load8x16 { a: self.0 } .qq == Load8x16 { a: rhs.0 } .qq}
     }
 }
 impl Mul for Edges {
     type Output = Edges;
+    #[inline]
     fn mul(self, rhs: Edges) -> Edges {
         let mut out = unsafe { vqtbl1q_u8(self.0, vandq_u8(rhs.0, EP_MASK)) };
         out = unsafe { veorq_u8(out, vandq_u8(rhs.0, EO_MASK)) };
@@ -61,6 +60,7 @@ impl Mul for Edges {
 }
 impl Mul<Turn> for Edges {
     type Output = Edges;
+    #[inline]
     fn mul(self, rhs: Turn) -> Edges {
         self * EDGE_TURNS[rhs]
     }

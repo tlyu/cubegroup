@@ -23,12 +23,14 @@ impl Display for Cube {
 }
 impl Mul for Cube {
     type Output = Cube;
+    #[inline]
     fn mul(self, rhs: Cube) -> Cube {
         Cube(self.0 * rhs.0, self.1 * rhs.1)
     }
 }
 impl Mul<Turn> for Cube {
     type Output = Cube;
+    #[inline]
     fn mul(self, rhs: Turn) -> Cube {
         Cube(self.0 * rhs, self.1 * rhs)
     }
