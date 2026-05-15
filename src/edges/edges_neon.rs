@@ -8,8 +8,8 @@ use super::*;
 use crate::simd_util::*;
 use crate::{Turn, Turns};
 
-const EP_MASK: uint8x16_t = unsafe { Load8x16 { qq: 0x0f0f0f0f0f0f0f0f0f0f0f0f } .a };
-const EO_MASK: uint8x16_t = unsafe { Load8x16 { qq: 0x101010101010101010101010 } .a };
+const EP_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x0f; 16] } .a };
+const EO_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x10; 16] } .a };
 const EDGES_IDENT: uint8x16_t = unsafe { Load8x16 { qq: 0x0b0a09080706050403020100 } .a };
 // SIMD table lookups will trash the upper bits; clear them for compares
 const CMP_MASK: u128 = 0x1f1f1f1f1f1f1f1f1f1f1f1f;
