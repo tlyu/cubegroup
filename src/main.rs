@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet};
+use std::collections::{HashSet};
 use std::str::FromStr;
 
 use cube_foo::*;
@@ -90,14 +90,14 @@ fn main() {
     #[cfg(not(debug_assertions))]
     let max = 7;
     let mut total = 0u64;
-    let mut hash = BTreeSet::<u128>::new();
-    hash.insert(cube.pack());
+    let mut hash = HashSet::<Cube>::new();
+    hash.insert(cube);
     let start = Instant::now();
     println!("counting unique positions...");
     for i in 0..max {
         let now = Instant::now();
         let mut count = 0u64;
-        idfs(i, None, cube, &mut |x| { if hash.insert(x.pack()) { count += 1; }});
+        idfs(i, None, cube, &mut |x| { if hash.insert(x) { count += 1; }});
         total += count;
         let elapsed = now.elapsed();
         let rate = total as f32 / elapsed.as_micros() as f32;
