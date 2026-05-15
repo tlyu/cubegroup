@@ -5,7 +5,7 @@ use crate::Turn;
 use crate::Turns;
 use super::*;
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Corner(pub(crate) u8);
 impl Corner {
     fn id(&self) -> u8 { self.0 & 0x07 }
@@ -32,7 +32,7 @@ impl Display for Corner {
         write!(f, "{}{}", &s[(twist)..], &s[..(twist)])
     }
 }
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Corners(pub(crate) [Corner; 8]);
 const CORNERS_IDENT: Corners = const {
     let mut c = Corners([Corner(0); 8]);

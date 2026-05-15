@@ -10,7 +10,8 @@ pub const NCORNERS: usize = 8;
 
 pub trait CornersTrait
     where Self: Clone + Copy + Debug + Display + Eq + Mul + Mul<Turn>
-        + for<'a> Mul<&'a Turns> + Not + PartialEq + Sized,
+        + for<'a> Mul<&'a Turns> + Not + PartialEq
+        + Ord + PartialOrd + Sized,
 {
     type Cycles: CornerCyclesTrait;
     fn parity(&self) -> bool;

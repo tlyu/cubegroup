@@ -11,7 +11,8 @@ const NEDGES: usize = 12;
 
 pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display
-        + Eq + Hash + Mul + Mul<Turn> + Not + PartialEq + Sized,
+        + Eq + Hash + Mul + Mul<Turn> + Not + PartialEq
+        + PartialOrd + Ord + Sized,
         for<'a> Self: Mul<&'a Turns>
 {
     type Cycles: EdgeCyclesTrait;

@@ -14,7 +14,7 @@ pub use {corners_neon::*, edges_neon::*};
 #[cfg(feature = "array")]
 pub use {corners_array::*, edges_array::*};
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {

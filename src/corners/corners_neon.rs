@@ -1,5 +1,6 @@
 #![cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use std::arch::aarch64::*;
+use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 use std::ops::{Mul, Not};
@@ -11,8 +12,6 @@ use crate::{Turn, Turns};
 const CP_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x0707070707070707 } .a };
 const CO_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x1818181818181818 } .a };
 const CORNERS_IDENT: uint8x8_t = unsafe { Load8x8 { q: 0x0706050403020100 } .a };
-// SIMD table lookups will trash the upper bits; clear them for compares
-const CMP_MASK: u64 = 0x1f1f1f1f1f1f1f1f;
 
 macro_rules! corners {
     ($(($id:expr, $twist:expr)),*) => {
@@ -49,14 +48,26 @@ impl Hash for Corners {
     fn hash<H>(&self, state: &mut H)
         where H: Hasher
     {
-        let x = unsafe { Load8x8 { a: self.0 } .q & CMP_MASK };
+        let x = unsafe { Load8x8 { a: self.0 } .q };
         x.hash(state)
     }
 }
 impl Eq for Corners {}
 impl PartialEq for Corners {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { Load8x8 { a: self.0 } .q & CMP_MASK == Load8x8 { a: rhs.0 } .q & CMP_MASK }
+        unsafe { Load8x8 { a: self.0 } .q == Load8x8 { a: rhs.0 } .q }
+    }
+}
+impl Ord for Corners {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a = unsafe { Load8x8 { a: self.0 } .q };
+        let b = unsafe { Load8x8 { a: other.0 } .q };
+        a.cmp(&b)
+    }
+}
+impl PartialOrd for Corners {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 impl Not for Corners {

@@ -1,5 +1,6 @@
 #![cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use std::arch::aarch64::*;
+use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::Hasher;
 use std::ops::{Mul, Not};
@@ -47,6 +48,18 @@ impl Eq for Edges {}
 impl PartialEq for Edges {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { Load8x16 { a: self.0 } .qq == Load8x16 { a: rhs.0 } .qq}
+    }
+}
+impl Ord for Edges {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a = unsafe { Load8x16 { a: self.0 } .qq };
+        let b = unsafe { Load8x16 { a: other.0 } .qq };
+        a.cmp(&b)
+    }
+}
+impl PartialOrd for Edges {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 impl Mul for Edges {
