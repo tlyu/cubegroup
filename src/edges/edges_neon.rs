@@ -78,7 +78,7 @@ impl Mul<&Turns> for Edges {
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Edges {
-        let mut out = Load8x16 { qq: 0u128 };
+        let mut out = Load8x16 { a: EDGES_IDENT };
         let a = unsafe { Load8x16 { a: self.0 } .b };
         for i in 0..NEDGES {
             let v = a[i];
