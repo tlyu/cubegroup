@@ -45,16 +45,14 @@ fn main() {
 
     let cube = Cube::default();
     println!("default cube: {cube}");
-    for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
-        println!("{:?}: {}", t, cube * t);
-        println!("{:?} cycles: {}", t, (cube * t).cycles());
+    println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
+    for x in Turn::allturns() {
+        println!("{:?}: {}", x, cube * x);
+        println!("{}: {}", x, (cube * x).cycles());
     }
     println!("sledge: {}", cube.turns(&[R3, F1, R1, F3]));
     println!("sledge cycles: {}", cube.turns(&[R3, F1, R1, F3]).cycles());
 
-    for t in [U1, U2, U3, R1, R2, R3, F1, F2, F3] {
-        println!("{:?} corner parity={}", t, (corners * t).parity());
-    }
     let s = Cube::default().turns(&[R1, U1]);
     println!("R U: {}", s.cycles());
     println!("F R U R' U' F': {}", cube.turns(&[F1, R1, U1, R3, U3, F3]).cycles());
@@ -65,14 +63,12 @@ fn main() {
     println!("{t}: {}", cube * &t);
     println!("{t}: {}", (cube * &t).cycles());
 
-    println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
-    for x in Turn::allturns() {
-        println!("{}: {}", x, (cube * x).cycles());
-    }
-
     let s = cube * &("R U2 D' B D'".parse::<Turns>().unwrap());
     let mut x = cube;
+    #[cfg(not(debug_assertions))]
     let max = 1u64 << 31;
+    #[cfg(debug_assertions)]
+    let max = 1u64 << 27;
     println!("{} turns...", max);
     let now = Instant::now();
     for _ in 0..max {
@@ -167,22 +163,5 @@ mod tests {
         let corners = corners_neon::Corners::default();
         let s = corners * &Turns::from(&[R1, U1, R3, U3]);
         assert_eq!(s * s, corners * &Turns::from(&[R1, U1, R3, U3, R1, U1, R3, U3]));
-    }
-
-    #[test]
-    fn test_turns() {
-        let a = [
-            ([U1, U2, U3], vec![R1, R2, R3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
-            ([R1, R2, R3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
-            ([F1, F2, F3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
-            ([D1, D2, D3], vec![R1, R2, R3, F1, F2, F3, L1, L2, L3, B1, B2, B3]),
-            ([L1, L2, L3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, B1, B2, B3]),
-            ([B1, B2, B3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3]),
-        ];
-        for (turns, seq) in a {
-            for t in turns {
-                assert_eq!(t.into_iter().collect::<Vec<_>>(), seq);
-            }
-        }
     }
 }

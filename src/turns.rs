@@ -185,3 +185,26 @@ impl<const N: usize> From<&[Turn; N]> for Turns {
         Turns((&x[..]).into())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use super::Turn::*;
+
+    #[test]
+    fn test_turns() {
+        let a = [
+            ([U1, U2, U3], vec![R1, R2, R3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([R1, R2, R3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([F1, F2, F3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3, B1, B2, B3]),
+            ([D1, D2, D3], vec![R1, R2, R3, F1, F2, F3, L1, L2, L3, B1, B2, B3]),
+            ([L1, L2, L3], vec![U1, U2, U3, F1, F2, F3, D1, D2, D3, B1, B2, B3]),
+            ([B1, B2, B3], vec![U1, U2, U3, R1, R2, R3, D1, D2, D3, L1, L2, L3]),
+        ];
+        for (turns, seq) in a {
+            for t in turns {
+                assert_eq!(t.into_iter().collect::<Vec<_>>(), seq);
+            }
+        }
+    }
+}
