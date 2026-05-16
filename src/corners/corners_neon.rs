@@ -143,4 +143,7 @@ impl CornersTrait for Corners {
         out |= (a >> 21) & (0x1f << 35);
         out
     }
+    fn speffz(self) -> String {
+        corners_array::Corners::from(self).speffz()
+    }
 }

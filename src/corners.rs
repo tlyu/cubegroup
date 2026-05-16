@@ -8,6 +8,12 @@ use crate::{Turn, Turns};
 
 pub const NCORNERS: usize = 8;
 
+pub const SPEFFZ_CORNERS: [&[u8]; 3] = [
+    b"ABCDUVWX",
+    b"RNJFLPTH",
+    b"EQMIGKOS",
+];
+
 pub trait CornersTrait
     where Self: Clone + Copy + Debug + Display + Eq + Mul + Mul<Turn>
         + for<'a> Mul<&'a Turns> + Not + PartialEq
@@ -17,8 +23,11 @@ pub trait CornersTrait
     fn parity(&self) -> bool;
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
+    fn speffz(self) -> String;
 }
-pub trait CornerCyclesTrait: Debug + Display {}
+pub trait CornerCyclesTrait: Debug + Display {
+    fn speffz(&self) -> String;
+}
 
 macro_rules! corner_turns {
     () => {

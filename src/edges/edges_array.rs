@@ -16,6 +16,13 @@ impl Display for Edge {
         write!(f, "{}{}", &s[flip..], &s[..flip])
     }
 }
+
+impl Edge {
+    pub fn speffz(self) -> char {
+        SPEFFZ_EDGES[(self.0 as usize) >> 4][self.0 as usize & 0xf] as char
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Edges(pub(crate) [Edge; 12]);
 static EDGES_SINGMASTER: [&str; 12] = [
@@ -159,6 +166,9 @@ impl EdgesTrait for Edges {
         out |= (self[11].0 as u64) << 55;
         out
     }
+    fn speffz(self) -> String {
+        self.0.into_iter().map(Edge::speffz).collect()
+    }
 }
 impl Edges {
     pub fn turns(&self, t: &[Turn]) -> Edges {
@@ -181,7 +191,20 @@ static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
 #[derive(Debug, Default)]
 pub struct EdgeCycles(Vec<(Vec<Edge>, u8)>);
-impl EdgeCyclesTrait for EdgeCycles {}
+impl EdgeCyclesTrait for EdgeCycles {
+    fn speffz(&self) -> String {
+        let mut out = String::new();
+        for (c, flip) in &self.0 {
+            let s: String = c.iter().map(|x| x.speffz()).collect();
+            let f = match flip {
+                1 => "+",
+                _ => "",
+            };
+            out += &format!("({}){}", s, f);
+        }
+        out
+    }
+}
 impl Display for EdgeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut first = true;

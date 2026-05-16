@@ -71,10 +71,18 @@ impl Cube {
         #[cfg(not(debug_assertions))]
         self.0.parity()
     }
+    pub fn speffz(self) -> String {
+        self.0.speffz() + "." + &self.1.speffz()
+    }
 }
 
 #[derive(Debug, Default)]
 pub struct CubeCycles(<Corners as CornersTrait>::Cycles, <Edges as EdgesTrait>::Cycles);
+impl CubeCycles {
+    pub fn speffz(&self) -> String {
+        self.0.speffz() + "." + &self.1.speffz()
+    }
+}
 impl Display for CubeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{}{}", self.0, self.1)

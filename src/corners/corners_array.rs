@@ -13,6 +13,9 @@ impl Corner {
         Corner(self.id() | (((self.twist() + t) % 3) << 3))
     }
     fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
+    pub fn speffz(self) -> char {
+        SPEFFZ_CORNERS[self.twist() as usize][self.id() as usize] as char
+    }
 }
 impl From<u8> for Corner {
     fn from(id: u8) -> Corner { Corner(id) }
@@ -142,6 +145,9 @@ impl CornersTrait for Corners {
         out |= (self[7].0 as u64) << 35;
         out
     }
+    fn speffz(self) -> String {
+        self.0.into_iter().map(Corner::speffz).collect()
+    }
 }
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }
@@ -188,7 +194,21 @@ static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Debug, Default)]
 pub struct CornerCycles(Vec<(Vec<Corner>, u8)>);
-impl CornerCyclesTrait for CornerCycles {}
+impl CornerCyclesTrait for CornerCycles {
+    fn speffz(&self) -> String {
+        let mut out = String::new();
+        for (c, twist) in &self.0 {
+            let s: String = c.iter().map(|x| x.speffz()).collect();
+            let t = match twist % 3{
+                1 => "-",
+                2 => "+",
+                _  => "",
+            };
+            out += &format!("({}){}", s, t);
+        }
+        out
+    }
+}
 impl Display for CornerCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut first = true;

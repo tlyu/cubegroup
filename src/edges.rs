@@ -9,6 +9,11 @@ pub mod edges_neon;
 
 const NEDGES: usize = 12;
 
+pub const SPEFFZ_EDGES: [&[u8]; 2] = [
+    b"ABCDRTJLUVWX",
+    b"QMIEHNPFKOSG"
+];
+
 pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display
         + Eq + Hash + Mul + Mul<Turn> + Not + PartialEq
@@ -19,8 +24,11 @@ pub trait EdgesTrait
     fn parity(&self) -> bool;
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
+    fn speffz(self) -> String;
 }
-pub trait EdgeCyclesTrait: Debug + Display {}
+pub trait EdgeCyclesTrait: Debug + Display {
+    fn speffz(&self) -> String;
+}
 
 macro_rules! edge_turns { () => {[
         edges![(3, 0), (0, 0), (1, 0), (2, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0)], // U1

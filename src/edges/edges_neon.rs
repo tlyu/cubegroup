@@ -131,4 +131,7 @@ impl EdgesTrait for Edges {
         out |= (a >> 33) & (0x1f << 55);
         out as u64
     }
+    fn speffz(self) -> String {
+        edges_array::Edges::from(self).speffz()
+    }
 }
