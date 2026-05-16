@@ -177,7 +177,7 @@ macro_rules! edges {
         ])
     }
 }
-static EDGE_TURNS: [Edges; 18] = edge_turns!();
+static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
 #[derive(Debug, Default)]
 pub struct EdgeCycles(Vec<(Vec<Edge>, u8)>);

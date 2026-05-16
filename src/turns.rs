@@ -3,6 +3,8 @@ use std::iter::{IntoIterator, Iterator};
 use std::ops::{Index, IndexMut};
 use std::str::FromStr;
 
+pub(crate) const NTURNS: usize = 18;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Face {
     U, R, F, D, L, B,
@@ -11,6 +13,38 @@ enum Face {
 enum Axis {
     Y, X, Z,
 }
+
+/// An outer turn of a 3x3x3 cube.
+///
+/// U1 = U, U3 = U', etc.
+///
+/// This representation embeds the concept of a *canonical sequence* of moves.
+/// Canonical sequences are useful for computerized solving.
+///
+/// Each variant can be iterated over, to produce possible next moves in a
+/// canonical sequence starting from that variant.
+///
+/// ```rust
+/// # use cubegroup::Turn;
+/// let x: Vec<_> = Turn::U1.into_iter().collect();
+/// ```
+///
+/// The [`allturns()`] function produces an iterator over all moves.
+///
+/// The [`canonturns()`] function produces an iterator over canonical
+/// moves that can follow the provided optional move, or an iterator over all
+/// moves, if `None`.
+///
+/// Two consecutive turns of the same face are equivalent to at most one turn.
+/// Two consecutive turns of two faces on the same axis commute with each
+/// other.
+/// To avoid multiple equivalent sequences, we enforce a priority of moves on
+/// each axis.
+///
+/// The numbering of the turns follows these rules:
+/// * Turns of the same face are grouped together
+/// * The clockwise quarter turn is first
+/// * Turns of opposite faces are in opposite halves of the number space
 #[allow(unused)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
@@ -35,9 +69,6 @@ pub enum Turn {
     B3 = 17,
 }
 impl Turn {
-    pub fn allturns() -> TurnIter {
-        TurnIter::new(Turn::U1, true)
-    }
     fn axis(self) -> Axis {
         match self.face() as u8 % 3 {
             0 => Axis::Y,
@@ -60,20 +91,24 @@ impl Turn {
     fn face_sign(self) -> bool {
         (self as u8 / 9) != 0
     }
-    fn filter(self, rhs: Turn) -> bool {
-        if self.face() == rhs.face() {
+    // Return `true` if `self` is an allowed next move following `prev`
+    fn optfilter(self, prev: Option<Turn>) -> bool {
+        let Some(prev) = prev else { return true };
+        if self.face() == prev.face() {
             return false;
         }
-        !self.face_sign() || self.axis() != rhs.axis()
+        !prev.face_sign() || prev.axis() != self.axis()
     }
 }
+
+/// Iterate over possible turns.
 pub struct TurnIter(Box<dyn Iterator<Item=Turn>>);
 impl TurnIter {
-    fn new(turn: Turn, all: bool) -> Self {
-        Self (
-            Box::new((0..18)
-                .map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8)})
-                .filter(move |x| all || turn.filter(*x)))
+    fn new(t: Option<Turn>) -> Self {
+        Self(
+            Box::new((0..NTURNS)
+                .map(|x| unsafe { std::mem::transmute::<_, Turn>(x as u8) })
+                .filter(move |x| x.optfilter(t)))
         )
     }
 }
@@ -83,13 +118,27 @@ impl Iterator for TurnIter {
         self.0.next()
     }
 }
+
 impl IntoIterator for Turn {
     type Item = Turn;
     type IntoIter = TurnIter;
+    /// Create an iterator over possible canonical moves, starting from `self`.
     fn into_iter(self) -> Self::IntoIter {
-        TurnIter::new(self, false)
+        TurnIter::new(Some(self))
     }
 }
+
+/// An iterator over all possible turns
+pub fn allturns() -> TurnIter {
+    TurnIter::new(None)
+}
+
+/// An iterator over all canonical turns that are allowed to follow `prev`.
+/// If `prev` is `None`, all turns are allowed.
+pub fn canonturns(prev: Option<Turn>) -> TurnIter {
+    TurnIter::new(prev)
+}
+
 impl<T> Index<Turn> for [T] {
     type Output = T;
     fn index(&self, i: Turn) -> &Self::Output {

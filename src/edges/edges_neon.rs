@@ -7,7 +7,6 @@ use std::ops::{Mul, Not};
 
 use super::*;
 use crate::simd_util::*;
-use crate::{Turn, Turns};
 
 const EP_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x0f; 16] } .a };
 const EO_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x10; 16] } .a };
@@ -22,7 +21,7 @@ macro_rules! edges {
     }
 }
 
-static EDGE_TURNS: [Edges; 18] = edge_turns!();
+static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
 #[derive(Clone, Copy, Debug)]
 pub struct Edges(uint8x16_t);

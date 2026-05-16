@@ -1,9 +1,8 @@
 use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
-use crate::Turn;
-use crate::Turns;
 use super::*;
+use crate::*;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Corner(pub(crate) u8);
@@ -185,7 +184,7 @@ macro_rules! corners {
     }
 }
 
-static CORNER_TURNS: [Corners; 18] = corner_turns!();
+static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Debug, Default)]
 pub struct CornerCycles(Vec<(Vec<Corner>, u8)>);

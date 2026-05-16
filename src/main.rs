@@ -5,11 +5,7 @@ use std::str::FromStr;
 use cubegroup::*;
 
 fn idfs<F: FnMut(Cube) -> ()>(level: u8, prev_move: Option<Turn>, prev_cube: Cube, f: &mut F) {
-    let iter = match prev_move {
-        Some(x) => { x.into_iter() },
-        None => { Turn::allturns() },
-    };
-    for t in iter {
+    for t in canonturns(prev_move) {
         let cube = prev_cube * t;
         if level != 0 {
             idfs(level - 1, Some(t), cube, f);
@@ -45,8 +41,8 @@ fn main() {
 
     let cube = Cube::default();
     println!("default cube: {cube}");
-    println!("allturns: {:?}", Turn::allturns().collect::<Vec<_>>());
-    for x in Turn::allturns() {
+    println!("allturns: {:?}", allturns().collect::<Vec<_>>());
+    for x in allturns() {
         println!("{:?}: {}", x, cube * x);
         println!("{}: {}", x, (cube * x).cycles());
     }

@@ -2,7 +2,7 @@ use std::hash::Hash;
 use std::fmt::{Debug, Display};
 use std::ops::{Mul, Not};
 
-use crate::{Turn, Turns};
+use crate::turns::*;
 
 pub mod edges_array;
 pub mod edges_neon;

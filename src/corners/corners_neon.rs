@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Mul, Not};
 
 use super::*;
+use crate::*;
 use crate::simd_util::*;
 use crate::{Turn, Turns};
 
@@ -22,7 +23,7 @@ macro_rules! corners {
         })
     }
 }
-static CORNER_TURNS: [Corners; 18] = corner_turns!();
+static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Clone, Copy, Debug)]
 pub struct Corners(uint8x8_t);
