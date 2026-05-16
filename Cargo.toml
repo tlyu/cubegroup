@@ -3,8 +3,12 @@ name = "cubegroup"
 version = "0.1.0"
 edition = "2024"
 license = "BSD-2-Clause"
+autoexamples = true
 
 [dependencies]
 
 [features]
 array = []
+
+[dev-dependencies]
+clap = "4.6.1"
