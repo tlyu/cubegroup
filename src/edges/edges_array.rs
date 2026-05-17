@@ -169,6 +169,9 @@ impl EdgesTrait for Edges {
     fn speffz(self) -> String {
         self.0.into_iter().map(Edge::speffz).collect()
     }
+    fn net_flip(&self) -> u8 {
+        self.0.into_iter().map(|x| (x.0 & 0x10) >> 4).sum::<u8>() & 1
+    }
 }
 impl Edges {
     pub fn turns(&self, t: &[Turn]) -> Edges {

@@ -74,6 +74,17 @@ impl Cube {
     pub fn speffz(self) -> String {
         self.0.speffz() + "." + &self.1.speffz()
     }
+    pub fn net_twist(&self) -> u8 {
+        self.0.net_twist()
+    }
+    pub fn net_flip(&self) -> u8 {
+        self.1.net_flip()
+    }
+    pub fn valid(&self) -> bool {
+        self.0.net_twist() == 0 &&
+            self.1.net_flip() == 0 &&
+            self.0.parity() == self.1.parity()
+    }
 }
 
 #[derive(Debug, Default)]
@@ -138,5 +149,31 @@ mod tests {
                 assert_eq!((cube * lhs).parity(), rhs);
         }
         assert!(!(cube * &Turns::from(&[R3, F1, R1, F3])).parity());
+    }
+
+    #[test]
+    fn test_twist() {
+        let c_array = corners_array::Corners::default();
+        let c_neon = corners_neon::Corners::default();
+        for t in turns::allturns() {
+            assert_eq!((c_array * t).net_twist(), 0);
+            assert_eq!((c_neon * t).net_twist(), 0);
+        }
+    }
+    #[test]
+    fn test_flip() {
+        let e_array = edges_array::Edges::default();
+        let e_neon = edges_neon::Edges::default();
+        for t in turns::allturns() {
+            assert_eq!((e_array * t).net_flip(), 0);
+            assert_eq!((e_neon * t).net_flip(), 0);
+        }
+    }
+    #[test]
+    fn test_valid() {
+        let cube = Cube::default();
+        for t in turns::allturns() {
+            assert!((cube * t).valid())
+        }
     }
 }

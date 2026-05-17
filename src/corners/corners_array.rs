@@ -148,6 +148,9 @@ impl CornersTrait for Corners {
     fn speffz(self) -> String {
         self.0.into_iter().map(Corner::speffz).collect()
     }
+    fn net_twist(&self) -> u8 {
+        self.0.into_iter().map(|x| x.twist()).sum::<u8>() % 3
+    }
 }
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }

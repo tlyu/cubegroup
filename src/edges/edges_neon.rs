@@ -134,4 +134,7 @@ impl EdgesTrait for Edges {
     fn speffz(self) -> String {
         edges_array::Edges::from(self).speffz()
     }
+    fn net_flip(&self) -> u8 {
+        unsafe { Load8x16 { a: self.0 } .qq }.count_ones() as u8 & 1
+    }
 }
