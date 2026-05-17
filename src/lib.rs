@@ -18,7 +18,7 @@ pub use {corners_array::*, edges_array::*};
 pub struct Cube(Corners, Edges);
 impl Display for Cube {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}; {}", self.0, self.1)
+        write!(f, "{} {}", self.0, self.1)
     }
 }
 impl Mul for Cube {

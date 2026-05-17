@@ -61,10 +61,11 @@ fn main() {
 
     let s = cube * &("R U2 D' B D'".parse::<Turns>().unwrap());
     let mut x = cube;
-    #[cfg(not(debug_assertions))]
-    let max = 1u64 << 31;
-    #[cfg(debug_assertions)]
-    let max = 1u64 << 27;
+    let max = if cfg!(debug_assertions) {
+        1u64<<27
+    } else {
+        1u64 << 31
+    };
     println!("{} turns...", max);
     let now = Instant::now();
     for _ in 0..max {
@@ -76,10 +77,11 @@ fn main() {
     println!("{} turns {:.2?} {:.2}M/s", max, elapsed, rate);
 
     println!("bare DFS...");
-    #[cfg(debug_assertions)]
-    let max = 7;
-    #[cfg(not(debug_assertions))]
-    let max = 9;
+    let max = if cfg!(debug_assertions) {
+        7
+    } else {
+        9
+    };
     let mut total = 0u64;
     for i in 0..max {
         let now = Instant::now();

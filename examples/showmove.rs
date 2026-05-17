@@ -7,8 +7,10 @@ use cubegroup::*;
 fn one(s: &str) -> Result<(), Box<dyn Error>> {
     let t = s.parse::<Turns>().map_err(|_| "parse failure".to_string())?;
     let c = Cube::default() * &t;
-    println!("{} position: {}", &t, c.speffz());
-    println!("{} cycles:   {}", &t, c.cycles().speffz());
+    println!("{} position: {}", &t, c);
+    println!("{} cycles:   {}", &t, c.cycles());
+    println!("{} position (Speffz): {}", &t, c.speffz());
+    println!("{} cycles (Speffz):   {}", &t, c.cycles().speffz());
     Ok(())
 }
 
