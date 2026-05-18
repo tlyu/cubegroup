@@ -1,4 +1,3 @@
-#![macro_use]
 use std::fmt::{Debug, Display};
 use std::ops::{Mul, Not};
 
@@ -6,9 +5,9 @@ pub mod corners_array;
 pub mod corners_neon;
 use crate::{Turn, Turns};
 
-pub const NCORNERS: usize = 8;
+const NCORNERS: usize = 8;
 
-pub const SPEFFZ_CORNERS: [&str; 3] = [
+const SPEFFZ_CORNERS: [&str; 3] = [
     "ABCDUVWX",
     "RNJFLPTH",
     "EQMIGKOS",

@@ -41,15 +41,8 @@ static EDGES_SINGMASTER: [&str; 12] = [
     "BL", "BR", "FR", "FL",
     "DF", "DR", "DB", "DL",
 ];
-const EDGES_IDENT: Edges = const {
-    let mut out = Edges([Edge(0); 12]);
-    let mut i = 0;
-    while i < 12 {
-        out.0[i as usize] = Edge(i);
-        i += 1;
-    }
-    out
-};
+const EDGES_IDENT: Edges = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+
 impl Default for Edges {
     fn default() -> Self {
         EDGES_IDENT
@@ -57,13 +50,8 @@ impl Default for Edges {
 }
 impl Display for Edges {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut first = true;
-        for x in self.0 {
-            if !first { write!(f, " ")?; }
-            first = false;
-            write!(f, "{x}")?;
-        }
-        Ok(())
+        let s = self.0.map(|x| x.to_string()).join(" ");
+        write!(f, "{s}")
     }
 }
 impl Index<u8> for Edges {
@@ -226,20 +214,13 @@ impl EdgeCyclesTrait for EdgeCycles {
 }
 impl Display for EdgeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut first = true;
         for (c, flip) in &self.0 {
-            write!(f, "(")?;
-            for x in c {
-                if !first { write!(f, ",")?; }
-                first = false;
-                write!(f, "{x}")?;
-            }
-            write!(f, ")")?;
+            let s = c.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(" ");
+            write!(f, "({s})")?;
             match flip {
                 x if *x != 0 => { write!(f, "+")?; },
                 _ => (),
             };
-            first = true;
         }
         Ok(())
     }

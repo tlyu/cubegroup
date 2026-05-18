@@ -47,15 +47,8 @@ impl Display for Corner {
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Corners(pub(crate) [Corner; 8]);
-const CORNERS_IDENT: Corners = const {
-    let mut c = Corners([Corner(0); 8]);
-    let mut id = 0;
-    while id < 8 {
-        c.0[id as usize] = Corner(id);
-        id += 1;
-    }
-    c
-};
+const CORNERS_IDENT: Corners = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7]);
+
 impl Default for Corners {
     fn default() -> Self { CORNERS_IDENT }
 }
@@ -180,13 +173,8 @@ impl Corners {
 }
 impl Display for Corners {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut first = true;
-        for corner in &self.0 {
-            if !first { write!(f, " ")?; }
-            first = false;
-            write!(f, "{corner}")?;
-        }
-        Ok(())
+        let s = self.0.map(|x| x.to_string()).join(" ");
+        write!(f, "{s}")
     }
 }
 impl Index<u8> for Corners {
@@ -230,21 +218,14 @@ impl CornerCyclesTrait for CornerCycles {
 }
 impl Display for CornerCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut first = true;
         for (c, twist) in &self.0 {
-            write!(f, "(")?;
-            for x in c {
-                if !first { write!(f, ",")?; }
-                first = false;
-                write!(f, "{x}")?;
-            }
-            write!(f, ")")?;
+            let s = c.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(",");
+            write!(f, "({s})")?;
             match twist % 3 {
                 1 => { write!(f, "-")?; },
                 2 => { write!(f, "+")?; },
                 _ => (),
             };
-            first = true;
         }
         Ok(())
     }

@@ -11,7 +11,8 @@ use super::*;
 
 const EP_MASK: uint8x16_t = must_cast([0x0fu8; 16]);
 const EO_MASK: uint8x16_t = must_cast([0x10u8; 16]);
-const EDGES_IDENT: uint8x16_t = must_cast(0x0f0e0d0c0b0a09080706050403020100u128);
+// The extra numbers allow the permutations to keep the upper bytes constant
+const EDGES_IDENT: uint8x16_t = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 macro_rules! edges {
     ( $( ($id:expr, $flip:expr) ),* ) => {
@@ -49,15 +50,13 @@ impl Eq for Edges {}
 impl PartialEq for Edges {
     fn eq(&self, rhs: &Self) -> bool {
         let a: &u128 = must_cast_ref(self);
-        let b: &u128 = must_cast_ref(rhs);
-        a.eq(b)
+        a == must_cast_ref(rhs)
     }
 }
 impl Ord for Edges {
     fn cmp(&self, other: &Self) -> Ordering {
         let a: &u128 = must_cast_ref(self);
-        let b: &u128 = must_cast_ref(other);
-        a.cmp(b)
+        a.cmp(must_cast_ref(other))
     }
 }
 impl PartialOrd for Edges {

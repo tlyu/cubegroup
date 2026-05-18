@@ -9,7 +9,7 @@ pub mod edges_neon;
 
 const NEDGES: usize = 12;
 
-pub const SPEFFZ_EDGES: [&str; 2] = [
+const SPEFFZ_EDGES: [&str; 2] = [
     "ABCDRTJLUVWX",
     "QMIEHNPFKOSG"
 ];
