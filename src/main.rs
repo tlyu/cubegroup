@@ -77,11 +77,7 @@ fn main() {
     println!("{} turns {:.2?} {:.2}M/s", max, elapsed, rate);
 
     println!("bare DFS...");
-    let max = if cfg!(debug_assertions) {
-        7
-    } else {
-        9
-    };
+    let max = if cfg!(debug_assertions) { 7 } else { 9 };
     let mut total = 0u64;
     for i in 0..max {
         let now = Instant::now();
@@ -90,13 +86,10 @@ fn main() {
         total += count;
         let elapsed = now.elapsed();
         let rate = total as f32 / elapsed.as_micros() as f32;
-        println!("level {} count {} {:.2?} ({:.2}M/s)", i+1, count, elapsed, rate);
+        println!("level {} count {:11} {:>8.2?} ({:.2}M/s)", i+1, count, elapsed, rate);
     }
 
-    #[cfg(debug_assertions)]
-    let max = 6;
-    #[cfg(not(debug_assertions))]
-    let max = 7;
+    let max = if cfg!(debug_assertions) { 6 } else { 7 };
     let mut total = 0u64;
     let mut hash = HashSet::<Cube>::new();
     hash.insert(cube);
@@ -109,7 +102,7 @@ fn main() {
         total += count;
         let elapsed = now.elapsed();
         let rate = total as f32 / elapsed.as_micros() as f32;
-        println!("level {} count {} {:.2?} ({:.2}M/s)", i+1, count, elapsed, rate)
+        println!("level {} count {:11} {:>8.2?} ({:.2}M/s)", i+1, count, elapsed, rate)
     }
     println!("total elapsed {:.2?}", start.elapsed());
 }
