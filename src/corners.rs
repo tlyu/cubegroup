@@ -8,10 +8,10 @@ use crate::{Turn, Turns};
 
 pub const NCORNERS: usize = 8;
 
-pub const SPEFFZ_CORNERS: [&[u8]; 3] = [
-    b"ABCDUVWX",
-    b"RNJFLPTH",
-    b"EQMIGKOS",
+pub const SPEFFZ_CORNERS: [&str; 3] = [
+    "ABCDUVWX",
+    "RNJFLPTH",
+    "EQMIGKOS",
 ];
 
 pub trait CornersTrait
@@ -25,6 +25,7 @@ pub trait CornersTrait
     fn pack(&self) -> u64;
     fn speffz(self) -> String;
     fn net_twist(&self) -> u8;
+    fn from_speffz(s: &str) -> Result<Self, ()>;
 }
 pub trait CornerCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;
@@ -60,3 +61,16 @@ macro_rules! corner_turns {
     }
 }
 pub(crate) use corner_turns;
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn test_speffz() {
+        assert_eq!(corners_array::Corners::from_speffz("ABCDUVWX").unwrap(), corners_array::Corners::default());
+        assert_eq!(corners_neon::Corners::from_speffz("ABCDUVWX").unwrap(), corners_neon::Corners::default());
+        assert_ne!(corners_array::Corners::from_speffz("BCDAUVWX").unwrap(), corners_array::Corners::default());
+        assert_ne!(corners_neon::Corners::from_speffz("BCDAUVWX").unwrap(), corners_neon::Corners::default());
+    }
+}

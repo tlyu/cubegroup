@@ -14,7 +14,14 @@ impl Corner {
     }
     fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
     pub fn speffz(self) -> char {
-        SPEFFZ_CORNERS[self.twist() as usize][self.id() as usize] as char
+        SPEFFZ_CORNERS[self.twist() as usize].as_bytes()[self.id() as usize] as char
+    }
+    pub fn from_speffz(c: char) -> Result<Self, ()> {
+        for twist in 0..3 {
+            let Some(id) = SPEFFZ_CORNERS[twist].find(c) else { continue; };
+            return Ok(Corner((id | (twist << 3)) as u8));
+        }
+        Err(())
     }
 }
 impl From<u8> for Corner {
@@ -150,6 +157,11 @@ impl CornersTrait for Corners {
     }
     fn net_twist(&self) -> u8 {
         self.0.into_iter().map(|x| x.twist()).sum::<u8>() % 3
+    }
+    fn from_speffz(s: &str) -> Result<Self, ()> {
+        let r: Result<Vec<_>, ()> = s.chars().map(|c| Corner::from_speffz(c)).collect();
+        let out: [Corner; NCORNERS] = r?[..].try_into().map_err(|_| ())?;
+        Ok(Corners(out))
     }
 }
 impl Corners {

@@ -9,9 +9,9 @@ pub mod edges_neon;
 
 const NEDGES: usize = 12;
 
-pub const SPEFFZ_EDGES: [&[u8]; 2] = [
-    b"ABCDRTJLUVWX",
-    b"QMIEHNPFKOSG"
+pub const SPEFFZ_EDGES: [&str; 2] = [
+    "ABCDRTJLUVWX",
+    "QMIEHNPFKOSG"
 ];
 
 pub trait EdgesTrait
@@ -26,6 +26,7 @@ pub trait EdgesTrait
     fn pack(&self) -> u64;
     fn speffz(self) -> String;
     fn net_flip(&self) -> u8;
+    fn from_speffz(s: &str) -> Result<Self, ()>;
 }
 pub trait EdgeCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;
@@ -58,3 +59,16 @@ macro_rules! edge_turns { () => {[
     ]}
 }
 pub(crate) use edge_turns;
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn test_speffz() {
+        assert_eq!(edges_array::Edges::from_speffz("ABCDRTJLUVWX").unwrap(), edges_array::Edges::default());
+        assert_eq!(edges_neon::Edges::from_speffz("ABCDRTJLUVWX").unwrap(), edges_neon::Edges::default());
+        assert_ne!(edges_array::Edges::from_speffz("BCDARTJLUVWX").unwrap(), edges_array::Edges::default());
+        assert_ne!(edges_neon::Edges::from_speffz("BCDARTJLUVWX").unwrap(), edges_neon::Edges::default());
+    }
+}

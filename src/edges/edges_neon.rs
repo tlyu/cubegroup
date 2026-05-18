@@ -107,6 +107,29 @@ impl From<Edges> for edges_array::Edges {
         edges_array::Edges(out)
     }
 }
+impl From<edges_array::Edges> for Edges {
+    fn from(v: edges_array::Edges) -> Self {
+        v.0[..].into()
+    }
+}
+impl From<&[edges_array::Edge]> for Edges {
+    fn from(v: &[edges_array::Edge]) -> Self {
+        let v: Vec<_> = v.into_iter().map(|x| x.0).collect();
+        let mut out = Load8x16 { a: EDGES_IDENT };
+        let b = unsafe { &mut out.b };
+        b[..NEDGES].copy_from_slice(&v[..NEDGES]);
+        Edges(unsafe { out.a })
+    }
+}
+impl From<&[edges_array::Edge; NEDGES]> for Edges {
+    fn from(v: &[edges_array::Edge; NEDGES]) -> Self {
+        let a = v.map(|x| x.0);
+        let out = Load8x16 { a: EDGES_IDENT };
+        let b = &mut unsafe { out.b };
+        b[..NEDGES].copy_from_slice(&a);
+        Edges(unsafe { out.a })
+    }
+}
 impl EdgesTrait for Edges {
     type Cycles = edges_array::EdgeCycles;
     fn parity(&self) -> bool {
@@ -136,5 +159,8 @@ impl EdgesTrait for Edges {
     }
     fn net_flip(&self) -> u8 {
         unsafe { Load8x16 { a: self.0 } .qq }.count_ones() as u8 & 1
+    }
+    fn from_speffz(s: &str) -> Result<Self, ()> {
+        Ok(edges_array::Edges::from_speffz(s)?.into())
     }
 }

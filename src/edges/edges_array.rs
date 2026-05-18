@@ -19,7 +19,14 @@ impl Display for Edge {
 
 impl Edge {
     pub fn speffz(self) -> char {
-        SPEFFZ_EDGES[(self.0 as usize) >> 4][self.0 as usize & 0xf] as char
+        SPEFFZ_EDGES[(self.0 as usize) >> 4].as_bytes()[self.0 as usize & 0xf] as char
+    }
+    pub fn from_speffz(c: char) -> Result<Edge, ()> {
+        for flip in 0..2 {
+            let Some(id) = SPEFFZ_EDGES[flip].find(c) else { continue; };
+            return Ok(Edge((id | (flip << 4)) as u8));
+        }
+        Err(())        
     }
 }
 
@@ -171,6 +178,11 @@ impl EdgesTrait for Edges {
     }
     fn net_flip(&self) -> u8 {
         self.0.into_iter().map(|x| (x.0 & 0x10) >> 4).sum::<u8>() & 1
+    }
+    fn from_speffz(s: &str) -> Result<Self, ()> {
+        let r: Result<Vec<_>, ()> = s.chars().map(|c| Edge::from_speffz(c)).collect();
+        let out: [Edge; NEDGES] = r?[..].try_into().map_err(|_| ())?;
+        Ok(Edges(out))
     }
 }
 impl Edges {

@@ -123,6 +123,13 @@ impl Mul<&Turns> for Corners {
         out
     }
 }
+impl From<corners_array::Corners> for Corners {
+    fn from(x: corners_array::Corners) -> Corners {
+        let mut out = Load8x8 { a: CORNERS_IDENT };
+        unsafe { &mut out.b }.copy_from_slice(&x.0.map(|x| x.0));
+        Corners(unsafe { out.a })
+    }
+}
 impl CornersTrait for Corners {
     type Cycles = corners_array::CornerCycles;
     fn parity(&self) -> bool {
@@ -148,5 +155,8 @@ impl CornersTrait for Corners {
     }
     fn net_twist(&self) -> u8 {
         unsafe { ((vaddv_u8(vand_u8(self.0, CO_MASK))) >> 3) % 3 }
+    }
+    fn from_speffz(s: &str) -> Result<Self, ()> {
+        Ok(corners_array::Corners::from_speffz(s)?.into())
     }
 }
