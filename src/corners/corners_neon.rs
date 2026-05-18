@@ -9,22 +9,20 @@ use bytemuck::*;
 
 use super::*;
 use crate::*;
-use crate::simd_util::*;
 use crate::{Turn, Turns};
 
-const CP_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x0707070707070707 } .a };
-const CO_MASK: uint8x8_t = unsafe { Load8x8 { q: 0x1818181818181818 } .a };
-const CORNERS_IDENT: uint8x8_t = unsafe { Load8x8 { q: 0x0706050403020100 } .a };
+const CP_MASK: uint8x8_t = must_cast([0x07u8; 8]);
+const CO_MASK: uint8x8_t = must_cast([0x18u8; 8]);
+const CORNERS_IDENT: uint8x8_t = must_cast(0x0706050403020100u64);
 
 macro_rules! corners {
     ($(($id:expr, $twist:expr)),*) => {
-        Corners(unsafe {
-            Load8x8 { b: [
-                $( $id | ($twist << 3) ),*
-            ] } .a
-        })
+        Corners(must_cast([
+                $( $id as u8 | (($twist as u8) << 3) ),*
+            ]))
     }
 }
+
 static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -49,20 +47,21 @@ impl Hash for Corners {
     fn hash<H>(&self, state: &mut H)
         where H: Hasher
     {
-        let x = unsafe { Load8x8 { a: self.0 } .q };
+        let x: u64 = must_cast(*self);
         x.hash(state)
     }
 }
 impl Eq for Corners {}
 impl PartialEq for Corners {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { Load8x8 { a: self.0 } .q == Load8x8 { a: rhs.0 } .q }
+        let a: u64 = must_cast(*self);
+        a == must_cast(*rhs)
     }
 }
 impl Ord for Corners {
     fn cmp(&self, other: &Self) -> Ordering {
-        let a = unsafe { Load8x8 { a: self.0 } .q };
-        let b = unsafe { Load8x8 { a: other.0 } .q };
+        let a: u64 = must_cast(*self);
+        let b: u64 = must_cast(*other);
         a.cmp(&b)
     }
 }
@@ -74,8 +73,8 @@ impl PartialOrd for Corners {
 impl Not for Corners {
     type Output = Corners;
     fn not(self) -> Self {
-        let mut out = Load8x8 { q: 0u64 };
-        let a = unsafe { Load8x8 { a: self.0 } .b };
+        let mut out = [0u8; 8];
+        let a: [u8; NCORNERS] = must_cast(self);
         for i in 0..NCORNERS {
             let slot = a[i] as usize & 0x07;
             let mut twist = a[i] & 0x18;
@@ -83,9 +82,9 @@ impl Not for Corners {
             if twist != 0x00 {
                 twist ^= 0x18;
             }
-            unsafe { out.b[slot] = i as u8 | twist };
+            out[slot] = i as u8 | twist;
         }
-        Corners(unsafe { out.a })
+        must_cast(out)
     }
 }
 // Use target_feature to avoid annotating everything as unsafe
@@ -137,7 +136,7 @@ impl CornersTrait for Corners {
         corners_array::Corners::from(*self).cycles()
     }
     fn pack(&self) -> u64 {
-        let a = unsafe { Load8x8 { a: self.0 } .q };
+        let a: u64 = must_cast(self.0);
         let mut out = a & 0x1f;
         out |= (a >> 3) & (0x1f << 5);
         out |= (a >> 6) & (0x1f << 10);

@@ -8,18 +8,17 @@ use std::ops::{Mul, Not};
 use bytemuck::*;
 
 use super::*;
-use crate::simd_util::*;
 
-const EP_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x0f; 16] } .a };
-const EO_MASK: uint8x16_t = unsafe { Load8x16 { b: [0x10; 16] } .a };
-const EDGES_IDENT: uint8x16_t = unsafe { Load8x16 { qq: 0x0f0e0d0c0b0a09080706050403020100 } .a };
+const EP_MASK: uint8x16_t = must_cast([0x0fu8; 16]);
+const EO_MASK: uint8x16_t = must_cast([0x10u8; 16]);
+const EDGES_IDENT: uint8x16_t = must_cast(0x0f0e0d0c0b0a09080706050403020100u128);
 
 macro_rules! edges {
     ( $( ($id:expr, $flip:expr) ),* ) => {
-        Edges(unsafe { Load8x16 { b: [
-            $( $id | ($flip << 4) ),*
+        Edges(must_cast([
+            $( $id as u8 | (($flip << 4) as u8) ),*
             , 12, 13, 14, 15
-        ]} .a })
+        ]))
     }
 }
 
@@ -42,21 +41,23 @@ impl Hash for Edges {
     fn hash<H>(&self, state: &mut H)
         where H: Hasher
     {
-        let x = unsafe { Load8x16 { a: self.0 } .qq };
+        let x: &u128 = must_cast_ref(self);
         x.hash(state)
     }
 }
 impl Eq for Edges {}
 impl PartialEq for Edges {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { Load8x16 { a: self.0 } .qq == Load8x16 { a: rhs.0 } .qq}
+        let a: &u128 = must_cast_ref(self);
+        let b: &u128 = must_cast_ref(rhs);
+        a.eq(b)
     }
 }
 impl Ord for Edges {
     fn cmp(&self, other: &Self) -> Ordering {
-        let a = unsafe { Load8x16 { a: self.0 } .qq };
-        let b = unsafe { Load8x16 { a: other.0 } .qq };
-        a.cmp(&b)
+        let a: &u128 = must_cast_ref(self);
+        let b: &u128 = must_cast_ref(other);
+        a.cmp(b)
     }
 }
 impl PartialOrd for Edges {
@@ -93,13 +94,13 @@ impl Mul<&Turns> for Edges {
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Edges {
-        let mut out = Load8x16 { a: EDGES_IDENT };
-        let a = unsafe { Load8x16 { a: self.0 } .b };
+        let mut out: [u8; 16] = must_cast(EDGES_IDENT);
+        let a: [u8; 16] = must_cast(self);
         for i in 0..NEDGES {
             let v = a[i];
-            unsafe { out.b[v as usize & 0xf] = i as u8 | v & 0x10 };
+            out[v as usize & 0xf] = i as u8 | v & 0x10;
         }
-        Edges(unsafe { out.a })
+        must_cast(out)
     }
 }
 impl From<Edges> for edges_array::Edges {
@@ -113,10 +114,9 @@ impl From<Edges> for edges_array::Edges {
 impl From<edges_array::Edges> for Edges {
     fn from(v: edges_array::Edges) -> Self {
         let a: &[u8; NEDGES] = must_cast_ref(&v);
-        let mut out = [0u8; 16];
+        let mut out: [u8; 16] = must_cast(EDGES_IDENT);
         out[..NEDGES].copy_from_slice(a);
-        // Copy upper bytes from EDGES_IDENT
-        must_cast(unsafe { vorrq_u8(must_cast(out), EDGES_IDENT) })
+        must_cast(out)
     }
 }
 impl EdgesTrait for Edges {
@@ -128,7 +128,7 @@ impl EdgesTrait for Edges {
         edges_array::Edges::from(*self).cycles()
     }
     fn pack(&self) -> u64 {
-        let a = unsafe { Load8x16 { a: self.0 } .qq };
+        let a: u128 = must_cast(*self);
         let mut out = a & 0x1f;
         out |= (a >> 3) & (0x1f << 5);
         out |= (a >> 6) & (0x1f << 10);
@@ -147,7 +147,8 @@ impl EdgesTrait for Edges {
         edges_array::Edges::from(self).speffz()
     }
     fn net_flip(&self) -> u8 {
-        unsafe { Load8x16 { a: self.0 } .qq }.count_ones() as u8 & 1
+        let x: u128 = must_cast(unsafe { vandq_u8(self.0, EO_MASK) });
+        x.count_ones() as u8 & 1
     }
     fn from_speffz(s: &str) -> Result<Self, ()> {
         Ok(edges_array::Edges::from_speffz(s)?.into())
