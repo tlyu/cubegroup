@@ -5,6 +5,8 @@ use std::fmt::{self, Display};
 use std::hash::Hasher;
 use std::ops::{Mul, Not};
 
+use bytemuck::*;
+
 use super::*;
 use crate::simd_util::*;
 
@@ -23,7 +25,8 @@ macro_rules! edges {
 
 static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+#[repr(transparent)]
 pub struct Edges(uint8x16_t);
 impl Default for Edges {
     fn default() -> Self {
@@ -101,33 +104,19 @@ impl Not for Edges {
 }
 impl From<Edges> for edges_array::Edges {
     fn from(x: Edges) -> edges_array::Edges {
-        let a = unsafe { Load8x16 { a: x.0 } .b };
-        let v: Vec<_> = a.into_iter().map(edges_array::Edge).collect();
-        let out: [_; NEDGES] = v[..NEDGES].try_into().unwrap();
-        edges_array::Edges(out)
+        let a: &[u8; 16] = must_cast_ref(&x);
+        let mut out = [0u8; NEDGES];
+        out.copy_from_slice(&a[..NEDGES]);
+        must_cast(out)
     }
 }
 impl From<edges_array::Edges> for Edges {
     fn from(v: edges_array::Edges) -> Self {
-        v.0[..].into()
-    }
-}
-impl From<&[edges_array::Edge]> for Edges {
-    fn from(v: &[edges_array::Edge]) -> Self {
-        let v: Vec<_> = v.into_iter().map(|x| x.0).collect();
-        let mut out = Load8x16 { a: EDGES_IDENT };
-        let b = unsafe { &mut out.b };
-        b[..NEDGES].copy_from_slice(&v[..NEDGES]);
-        Edges(unsafe { out.a })
-    }
-}
-impl From<&[edges_array::Edge; NEDGES]> for Edges {
-    fn from(v: &[edges_array::Edge; NEDGES]) -> Self {
-        let a = v.map(|x| x.0);
-        let out = Load8x16 { a: EDGES_IDENT };
-        let b = &mut unsafe { out.b };
-        b[..NEDGES].copy_from_slice(&a);
-        Edges(unsafe { out.a })
+        let a: &[u8; NEDGES] = must_cast_ref(&v);
+        let mut out = [0u8; 16];
+        out[..NEDGES].copy_from_slice(a);
+        // Copy upper bytes from EDGES_IDENT
+        must_cast(unsafe { vorrq_u8(must_cast(out), EDGES_IDENT) })
     }
 }
 impl EdgesTrait for Edges {

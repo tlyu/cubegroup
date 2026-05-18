@@ -5,6 +5,8 @@ use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 use std::ops::{Mul, Not};
 
+use bytemuck::*;
+
 use super::*;
 use crate::*;
 use crate::simd_util::*;
@@ -25,7 +27,8 @@ macro_rules! corners {
 }
 static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+#[repr(transparent)]
 pub struct Corners(uint8x8_t);
 impl Default for Corners {
     fn default() -> Corners {
@@ -39,10 +42,7 @@ impl Display for Corners {
 }
 impl From<Corners> for corners_array::Corners {
     fn from(x: Corners) -> Self {
-        let a = unsafe { Load8x8 { a: x.0 } .b };
-        let v: Vec<_> = a.into_iter().map(corners_array::Corner).collect();
-        let out: [_; NCORNERS] = v[..NCORNERS].try_into().unwrap();
-        corners_array::Corners(out)
+        must_cast(x)
     }
 }
 impl Hash for Corners {
@@ -125,9 +125,7 @@ impl Mul<&Turns> for Corners {
 }
 impl From<corners_array::Corners> for Corners {
     fn from(x: corners_array::Corners) -> Corners {
-        let mut out = Load8x8 { a: CORNERS_IDENT };
-        unsafe { &mut out.b }.copy_from_slice(&x.0.map(|x| x.0));
-        Corners(unsafe { out.a })
+        must_cast(x)
     }
 }
 impl CornersTrait for Corners {

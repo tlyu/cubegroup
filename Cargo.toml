@@ -6,6 +6,7 @@ license = "BSD-2-Clause"
 autoexamples = true
 
 [dependencies]
+bytemuck = { version = "1.25.0", features = ["aarch64_simd", "derive", "must_cast"] }
 
 [features]
 array = []

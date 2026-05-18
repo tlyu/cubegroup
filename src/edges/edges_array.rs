@@ -1,13 +1,16 @@
 use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
+use bytemuck::*;
+
 use crate::Turn;
 use crate::Turns;
 
 use super::*;
 
 // Lower 4 bits for id, bit 4 for flip
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
+#[repr(transparent)]
 pub struct Edge(pub(crate) u8);
 impl Display for Edge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -30,7 +33,8 @@ impl Edge {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
+#[repr(transparent)]
 pub struct Edges(pub(crate) [Edge; 12]);
 static EDGES_SINGMASTER: [&str; 12] = [
     "UB", "UR", "UF", "UL",
