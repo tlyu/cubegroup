@@ -1,7 +1,6 @@
 #![cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use std::arch::aarch64::*;
 use std::cmp::Ordering;
-use std::fmt::{self, Display};
 use std::hash::Hasher;
 use std::ops::{Mul, Not};
 
@@ -28,14 +27,10 @@ static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Edges(uint8x16_t);
+impl EdgesOps for Edges {}
 impl Default for Edges {
     fn default() -> Self {
         Edges(EDGES_IDENT)
-    }
-}
-impl Display for Edges {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", edges_array::Edges::from(*self))
     }
 }
 impl Hash for Edges {
@@ -142,14 +137,8 @@ impl EdgesTrait for Edges {
         out |= (a >> 33) & (0x1f << 55);
         out as u64
     }
-    fn speffz(self) -> String {
-        edges_array::Edges::from(self).speffz()
-    }
     fn net_flip(&self) -> u8 {
         let x: u128 = must_cast(unsafe { vandq_u8(self.0, EO_MASK) });
         x.count_ones() as u8 & 1
-    }
-    fn from_speffz(s: &str) -> Result<Self, ()> {
-        Ok(edges_array::Edges::from_speffz(s)?.into())
     }
 }

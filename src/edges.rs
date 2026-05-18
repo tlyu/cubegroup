@@ -2,31 +2,44 @@ use std::hash::Hash;
 use std::fmt::{Debug, Display};
 use std::ops::{Mul, Not};
 
+use crate::speffz::*;
 use crate::turns::*;
 
 pub mod edges_array;
 pub mod edges_neon;
+mod edges_convert;
 
-const NEDGES: usize = 12;
+pub(crate) const NEDGES: usize = 12;
+pub(crate) const NFLIP: usize = 2;
 
-const SPEFFZ_EDGES: [&str; 2] = [
-    "ABCDRTJLUVWX",
-    "QMIEHNPFKOSG"
+static EDGES_SINGMASTER: [[&str; NEDGES]; NFLIP] = [
+    [
+        "UB", "UR", "UF", "UL",
+        "BL", "BR", "FR", "FL",
+        "DF", "DR", "DB", "DL",
+    ],
+    [
+        "BU", "RU", "FU", "LU",
+        "LB", "RB", "RF", "LF",
+        "FD", "RD", "BD", "LD",
+    ],
 ];
 
+pub trait EdgesOps
+    where Self: Sized + Mul + Mul<Turn> + Not
+        + Eq + Hash + Ord + PartialEq + PartialOrd,
+        for<'a> Self: Mul<&'a Turns>
+{
+}
 pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display
-        + Eq + Hash + Mul + Mul<Turn> + Not + PartialEq
-        + PartialOrd + Ord + Sized,
-        for<'a> Self: Mul<&'a Turns>
+        + EdgesOps + Speffz
 {
     type Cycles: EdgeCyclesTrait;
     fn parity(&self) -> bool;
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
-    fn speffz(self) -> String;
     fn net_flip(&self) -> u8;
-    fn from_speffz(s: &str) -> Result<Self, ()>;
 }
 pub trait EdgeCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;
@@ -62,7 +75,18 @@ pub(crate) use edge_turns;
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
+
+    #[test]
+    fn test_singmaster() {
+        for flip in 0..NFLIP {
+            for id in 0..NEDGES {
+                let s = EDGES_SINGMASTER[flip][id];
+                // Make sure that strings are consistent with flips
+                assert_eq!(s[flip..].to_string()+&s[..flip], EDGES_SINGMASTER[0][id]);
+            }
+        }
+    }
 
     #[test]
     fn test_speffz() {

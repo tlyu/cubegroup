@@ -3,6 +3,7 @@ use std::ops::{Index, IndexMut, Mul, Not};
 
 use bytemuck::*;
 
+use crate::speffz::*;
 use crate::Turn;
 use crate::Turns;
 
@@ -12,46 +13,17 @@ use super::*;
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Edge(pub(crate) u8);
-impl Display for Edge {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let (id, flip) = (self.0 as usize & 0x0f, (self.0 as usize & 0x10) >> 4);
-        let s = EDGES_SINGMASTER[id];
-        write!(f, "{}{}", &s[flip..], &s[..flip])
-    }
-}
-
-impl Edge {
-    pub fn speffz(self) -> char {
-        SPEFFZ_EDGES[(self.0 as usize) >> 4].as_bytes()[self.0 as usize & 0xf] as char
-    }
-    pub fn from_speffz(c: char) -> Result<Edge, ()> {
-        for flip in 0..2 {
-            let Some(id) = SPEFFZ_EDGES[flip].find(c) else { continue; };
-            return Ok(Edge((id | (flip << 4)) as u8));
-        }
-        Err(())        
-    }
-}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Edges(pub(crate) [Edge; 12]);
-static EDGES_SINGMASTER: [&str; 12] = [
-    "UB", "UR", "UF", "UL",
-    "BL", "BR", "FR", "FL",
-    "DF", "DR", "DB", "DL",
-];
 const EDGES_IDENT: Edges = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+
+impl EdgesOps for Edges {}
 
 impl Default for Edges {
     fn default() -> Self {
         EDGES_IDENT
-    }
-}
-impl Display for Edges {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let s = self.0.map(|x| x.to_string()).join(" ");
-        write!(f, "{s}")
     }
 }
 impl Index<u8> for Edges {
@@ -165,16 +137,8 @@ impl EdgesTrait for Edges {
         out |= (self[11].0 as u64) << 55;
         out
     }
-    fn speffz(self) -> String {
-        self.0.into_iter().map(Edge::speffz).collect()
-    }
     fn net_flip(&self) -> u8 {
         self.0.into_iter().map(|x| (x.0 & 0x10) >> 4).sum::<u8>() & 1
-    }
-    fn from_speffz(s: &str) -> Result<Self, ()> {
-        let r: Result<Vec<_>, ()> = s.chars().map(|c| Edge::from_speffz(c)).collect();
-        let out: [Edge; NEDGES] = r?[..].try_into().map_err(|_| ())?;
-        Ok(Edges(out))
     }
 }
 impl Edges {

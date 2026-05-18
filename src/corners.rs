@@ -13,10 +13,15 @@ const SPEFFZ_CORNERS: [&str; 3] = [
     "EQMIGKOS",
 ];
 
+pub trait CornersOps
+    where Self: Sized + Mul + Mul<Turn> + Not
+        + Eq + Ord + PartialEq + PartialOrd,
+        for<'a> Self: Mul<&'a Turns>
+{
+}
 pub trait CornersTrait
-    where Self: Clone + Copy + Debug + Display + Eq + Mul + Mul<Turn>
-        + for<'a> Mul<&'a Turns> + Not + PartialEq
-        + Ord + PartialOrd + Sized,
+    where Self: Clone + Copy + Debug + Display
+        + CornersOps
 {
     type Cycles: CornerCyclesTrait;
     fn parity(&self) -> bool;

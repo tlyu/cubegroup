@@ -49,6 +49,8 @@ impl Display for Corner {
 pub struct Corners(pub(crate) [Corner; 8]);
 const CORNERS_IDENT: Corners = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7]);
 
+impl CornersOps for Corners {}
+
 impl Default for Corners {
     fn default() -> Self { CORNERS_IDENT }
 }
