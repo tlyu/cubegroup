@@ -106,3 +106,22 @@ fn main() {
     }
     println!("total elapsed {:.2?}", start.elapsed());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_idfs() {
+        let cube = Cube::default();
+        let mut v = Vec::new();
+        let mut hash = HashSet::<Cube>::new();
+        hash.insert(cube);
+        for i in 0..5 {
+            let mut count = 0u64;
+            idfs(i, None, cube, &mut |x| { if hash.insert(x) { count += 1; }});
+            v.push(count);
+        }
+        assert_eq!(v, [18, 243, 3240, 43239, 574908]);
+    }
+}
