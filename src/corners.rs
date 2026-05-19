@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Display};
 
+use bytemuck::*;
+
 pub mod corners_array;
 pub mod corners_neon;
 mod corners_convert;
@@ -23,6 +25,21 @@ static CORNERS_SINGMASTER: [[&str; NCORNERS]; NTWIST] = [
         "LFD", "FRD", "RBD", "BLD",
     ],
 ];
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
+#[repr(transparent)]
+pub struct Corner(pub(crate) u8);
+impl Corner {
+    pub(crate) fn id(&self) -> u8 { self.0 & 0x07 }
+    pub(crate) fn twist(&self) -> u8 { (self.0 & 0x18) >> 3 }
+    pub(crate) fn dotwist(&self, t: u8) -> Self {
+        Corner(self.id() | (((self.twist() + t) % 3) << 3))
+    }
+    pub(crate) fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
+}
+impl From<u8> for Corner {
+    fn from(id: u8) -> Corner { Corner(id) }
+}
 
 pub trait CornersTrait
     where Self: Clone + Copy + Debug + Default + Display

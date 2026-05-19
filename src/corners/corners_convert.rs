@@ -1,10 +1,8 @@
 use std::fmt::{self, Display};
 
-use crate::corners_array;
-use crate::corners_neon;
-use crate::corners::CORNERS_SINGMASTER;
+use crate::corners::*;
 
-impl Display for corners_array::Corner {
+impl Display for Corner {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let (id, twist) = (self.id() as usize, self.twist() as usize);
         let s = CORNERS_SINGMASTER[twist][id];

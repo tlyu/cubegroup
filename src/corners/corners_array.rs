@@ -7,20 +7,6 @@ use itertools::Itertools;
 use super::*;
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
-#[repr(transparent)]
-pub struct Corner(pub(crate) u8);
-impl Corner {
-    pub(crate) fn id(&self) -> u8 { self.0 & 0x07 }
-    pub(crate) fn twist(&self) -> u8 { (self.0 & 0x18) >> 3 }
-    fn dotwist(&self, t: u8) -> Self {
-        Corner(self.id() | (((self.twist() + t) % 3) << 3))
-    }
-    fn untwist(&self, t: u8) -> Self { self.dotwist(3 - t) }
-}
-impl From<u8> for Corner {
-    fn from(id: u8) -> Corner { Corner(id) }
-}
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Corners(pub(crate) [Corner; 8]);

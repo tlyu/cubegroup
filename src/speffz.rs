@@ -4,8 +4,6 @@ use thiserror::Error;
 
 use super::corners::*;
 use super::edges::*;
-use corners_array::Corner;
-use edges_array::Edge;
 
 #[derive(Debug, Error)]
 pub enum ParseSpeffzError {

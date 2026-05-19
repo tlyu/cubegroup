@@ -1,6 +1,8 @@
 use std::hash::Hash;
 use std::fmt::{Debug, Display};
 
+use bytemuck::*;
+
 use crate::speffz::*;
 use crate::turns::*;
 
@@ -23,6 +25,12 @@ static EDGES_SINGMASTER: [[&str; NEDGES]; NFLIP] = [
         "FD", "RD", "BD", "LD",
     ],
 ];
+
+// Lower 4 bits for id, bit 4 for flip
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
+#[repr(transparent)]
+pub struct Edge(pub(crate) u8);
+
 
 pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display

@@ -1,7 +1,6 @@
 use std::fmt::{self, Display};
 
-use super::*;
-use crate::edges_array::Edge;
+use crate::edges::*;
 
 impl Display for Edge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
