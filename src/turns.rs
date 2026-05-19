@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 use std::iter::{IntoIterator, Iterator};
-use std::ops::{Index, IndexMut};
+use std::ops::{Deref, Index, IndexMut};
 use std::str::FromStr;
 
 pub(crate) const NTURNS: usize = 18;
@@ -205,6 +205,18 @@ impl FromStr for Turn {
 
 #[derive(Debug, Default)]
 pub struct Turns(pub(crate) Vec<Turn>);
+impl Deref for Turns {
+    type Target = [Turn];
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+
+}
+impl AsRef<[Turn]> for Turns {
+    fn as_ref(&self) -> &[Turn] {
+        self.deref().as_ref()
+    }
+}
 impl Display for Turns {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut first = true;

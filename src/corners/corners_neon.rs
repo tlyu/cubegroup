@@ -9,7 +9,6 @@ use bytemuck::*;
 
 use super::*;
 use crate::*;
-use crate::{Turn, Turns};
 
 const CP_MASK: uint8x8_t = must_cast([0x07u8; 8]);
 const CO_MASK: uint8x8_t = must_cast([0x18u8; 8]);
@@ -28,8 +27,6 @@ static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Corners(uint8x8_t);
-
-impl CornersOps for Corners {}
 
 impl Default for Corners {
     fn default() -> Corners {
@@ -115,21 +112,15 @@ impl Mul<Turn> for Corners {
         self * CORNER_TURNS[rhs]
     }
 }
-impl Mul<&Turns> for Corners {
-    type Output = Corners;
-    fn mul(self, rhs: &Turns) -> Corners {
-        let mut out = self;
-        for x in &rhs.0 {
-            out = out * *x;
-        }
-        out
-    }
-}
 impl From<corners_array::Corners> for Corners {
     fn from(x: corners_array::Corners) -> Corners {
         must_cast(x)
     }
 }
+gen_ops! {
+    Corners
+}
+impl CubeOps for Corners {}
 impl CornersTrait for Corners {
     type Cycles = corners_array::CornerCycles;
     fn parity(&self) -> bool {

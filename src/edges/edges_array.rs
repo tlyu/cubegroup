@@ -3,9 +3,10 @@ use std::ops::{Index, IndexMut, Mul, Not};
 
 use bytemuck::*;
 
+use crate::*;
 use crate::speffz::*;
 use crate::Turn;
-use crate::Turns;
+use crate::CubeOps;
 
 use super::*;
 
@@ -18,8 +19,6 @@ pub struct Edge(pub(crate) u8);
 #[repr(transparent)]
 pub struct Edges(pub(crate) [Edge; 12]);
 const EDGES_IDENT: Edges = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-
-impl EdgesOps for Edges {}
 
 impl Default for Edges {
     fn default() -> Self {
@@ -49,16 +48,6 @@ impl Mul<Turn> for Edges {
         self * EDGE_TURNS[rhs]
     }
 }
-impl Mul<&Turns> for Edges {
-    type Output = Edges;
-    fn mul(self, rhs: &Turns) -> Edges {
-        let mut out = self;
-        for x in &rhs.0 {
-            out = out * *x;
-        }
-        out
-    }
-}
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Self {
@@ -70,6 +59,10 @@ impl Not for Edges {
         out
     }
 }
+gen_ops! {
+    Edges
+}
+impl CubeOps for Edges {}
 impl EdgesTrait for Edges {
     type Cycles = EdgeCycles;
     fn parity(&self) -> bool {

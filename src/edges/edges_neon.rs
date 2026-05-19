@@ -7,6 +7,7 @@ use std::ops::{Mul, Not};
 use bytemuck::*;
 
 use super::*;
+use crate::*;
 
 const EP_MASK: uint8x16_t = must_cast([0x0fu8; 16]);
 const EO_MASK: uint8x16_t = must_cast([0x10u8; 16]);
@@ -27,7 +28,6 @@ static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Edges(uint8x16_t);
-impl EdgesOps for Edges {}
 impl Default for Edges {
     fn default() -> Self {
         Edges(EDGES_IDENT)
@@ -75,16 +75,6 @@ impl Mul<Turn> for Edges {
         self * EDGE_TURNS[rhs]
     }
 }
-impl Mul<&Turns> for Edges {
-    type Output = Edges;
-    fn mul(self, rhs: &Turns) -> Edges {
-        let mut out = self;
-        for x in &rhs.0 {
-            out = out * *x;
-        }
-        out
-    }
-}
 impl Not for Edges {
     type Output = Edges;
     fn not(self) -> Edges {
@@ -113,6 +103,10 @@ impl From<edges_array::Edges> for Edges {
         must_cast(out)
     }
 }
+gen_ops! {
+    Edges
+}
+impl CubeOps for Edges {}
 impl EdgesTrait for Edges {
     type Cycles = edges_array::EdgeCycles;
     fn parity(&self) -> bool {

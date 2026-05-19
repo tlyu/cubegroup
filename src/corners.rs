@@ -1,9 +1,7 @@
 use std::fmt::{Debug, Display};
-use std::ops::{Mul, Not};
 
 pub mod corners_array;
 pub mod corners_neon;
-use crate::{Turn, Turns};
 
 const NCORNERS: usize = 8;
 
@@ -13,17 +11,12 @@ const SPEFFZ_CORNERS: [&str; 3] = [
     "EQMIGKOS",
 ];
 
-pub trait CornersOps
-    where Self: Sized + Mul + Mul<Turn> + Not
-        + Eq + Ord + PartialEq + PartialOrd,
-        for<'a> Self: Mul<&'a Turns>
-{
-}
 pub trait CornersTrait
-    where Self: Clone + Copy + Debug + Display
-        + CornersOps
+    where Self: Clone + Copy + Debug + Default + Display
+        + crate::CubeOps
 {
     type Cycles: CornerCyclesTrait;
+    fn new() -> Self { Self::default() }
     fn parity(&self) -> bool;
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;

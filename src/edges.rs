@@ -1,6 +1,5 @@
 use std::hash::Hash;
 use std::fmt::{Debug, Display};
-use std::ops::{Mul, Not};
 
 use crate::speffz::*;
 use crate::turns::*;
@@ -25,15 +24,9 @@ static EDGES_SINGMASTER: [[&str; NEDGES]; NFLIP] = [
     ],
 ];
 
-pub trait EdgesOps
-    where Self: Sized + Mul + Mul<Turn> + Not
-        + Eq + Hash + Ord + PartialEq + PartialOrd,
-        for<'a> Self: Mul<&'a Turns>
-{
-}
 pub trait EdgesTrait
     where Self: Clone + Copy + Debug + Default + Display
-        + EdgesOps + Speffz
+        + crate::CubeOps + Speffz
 {
     type Cycles: EdgeCyclesTrait;
     fn parity(&self) -> bool;

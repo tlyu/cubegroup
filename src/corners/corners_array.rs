@@ -49,8 +49,6 @@ impl Display for Corner {
 pub struct Corners(pub(crate) [Corner; 8]);
 const CORNERS_IDENT: Corners = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7]);
 
-impl CornersOps for Corners {}
-
 impl Default for Corners {
     fn default() -> Self { CORNERS_IDENT }
 }
@@ -66,16 +64,6 @@ impl Mul<Turn> for Corners {
         self * CORNER_TURNS[rhs]
     }
 }
-impl Mul<&Turns> for Corners {
-    type Output = Corners;
-    fn mul(self, rhs: &Turns) -> Corners {
-        let mut out = self;
-        for x in &rhs.0 {
-            out = out * *x;
-        }
-        out
-    }
-}
 impl Not for Corners {
     type Output = Corners;
     fn not(self) -> Self {
@@ -88,6 +76,10 @@ impl Not for Corners {
         out
     }
 }
+gen_ops! {
+    Corners
+}
+impl CubeOps for Corners {}
 impl CornersTrait for Corners {
     type Cycles = CornerCycles;
     fn parity(&self) -> bool {

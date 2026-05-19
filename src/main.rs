@@ -46,7 +46,7 @@ fn main() {
         println!("{:?}: {}", x, cube * x);
         println!("{}: {}", x, (cube * x).cycles());
     }
-    println!("sledge: {}", cube.turns(&[R3, F1, R1, F3]));
+    println!("sledge: {}", cube * [R3, F1, R1, F3]);
     println!("sledge cycles: {}", cube.turns(&[R3, F1, R1, F3]).cycles());
 
     let s = Cube::default().turns(&[R1, U1]);

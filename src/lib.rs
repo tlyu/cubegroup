@@ -1,6 +1,12 @@
 use std::fmt::{self, Display};
 use std::ops::{Mul, Not};
 
+use forward_ref_generic::forward_ref_binop;
+use forward_ref_generic::forward_ref_unop;
+
+#[macro_use]
+mod internal_macros;
+
 mod corners;
 pub use corners::*;
 mod edges;
@@ -14,6 +20,12 @@ pub use speffz::*;
 pub use {corners_neon::*, edges_neon::*};
 #[cfg(feature = "array")]
 pub use {corners_array::*, edges_array::*};
+
+pub trait CubeOps where
+        Self: Sized + Mul + Mul<Turn> + for<'b> Mul<&'b Turn> + Not,
+        Self: Eq + PartialEq + PartialOrd + Ord
+{
+}
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Cube(Corners, Edges);
@@ -33,12 +45,6 @@ impl Mul<Turn> for Cube {
     type Output = Cube;
     #[inline]
     fn mul(self, rhs: Turn) -> Cube {
-        Cube(self.0 * rhs, self.1 * rhs)
-    }
-}
-impl Mul<&Turns> for Cube {
-    type Output = Cube;
-    fn mul(self, rhs: &Turns) -> Cube {
         Cube(self.0 * rhs, self.1 * rhs)
     }
 }
@@ -106,6 +112,8 @@ impl Display for CubeCycles {
         write!(f, "{}{}", self.0, self.1)
     }
 }
+
+gen_ops!(Cube);
 
 #[cfg(test)]
 mod tests {
