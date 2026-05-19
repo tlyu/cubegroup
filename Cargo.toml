@@ -9,6 +9,7 @@ autoexamples = true
 bytemuck = { version = "1.25.0", features = ["aarch64_simd", "derive", "must_cast"] }
 forward_ref_generic = "0.2.1"
 itertools = "0.14.0"
+thiserror = "2.0.18"
 
 [features]
 array = []

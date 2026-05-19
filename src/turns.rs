@@ -4,8 +4,17 @@ use std::ops::{Deref, Index, IndexMut};
 use std::str::FromStr;
 
 use itertools::Itertools;
+use thiserror::Error;
 
 pub(crate) const NTURNS: usize = 18;
+
+#[derive(Debug, Error)]
+pub enum ParseTurnError {
+    #[error("invalid face letter")]
+    BadFaceLetter,
+    #[error("invalid turn suffix")]
+    BadTurnSuffix,
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Face {
@@ -179,8 +188,8 @@ impl Display for Turn {
     }
 }
 impl FromStr for Turn {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Turn, ()> {
+    type Err = ParseTurnError;
+    fn from_str(s: &str) -> Result<Turn, ParseTurnError> {
         use Turn::*;
         let mut out: u8;
         let mut c = s.chars();
@@ -191,14 +200,14 @@ impl FromStr for Turn {
             Some('D') => { out = D1 as u8; },
             Some('B') => { out = B1 as u8; },
             Some('L') => { out = L1 as u8; },
-            _ => { return Err(()); },
+            _ => { return Err(ParseTurnError::BadFaceLetter); },
         }
         match c.next() {
             Some('\'') | Some('3') => { out += 2; },
             Some('1') => (),
             Some('2') => { out += 1; },
             None => (),
-            _ => { return Err(()); },
+            _ => { return Err(ParseTurnError::BadTurnSuffix); },
         }
         // All of the possible values of out are safe at this point
         Ok(unsafe { std::mem::transmute(out) })
@@ -226,10 +235,10 @@ impl Display for Turns {
     }
 }
 impl FromStr for Turns {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Self, ()> {
+    type Err = ParseTurnError;
+    fn from_str(s: &str) -> Result<Self, ParseTurnError> {
         let r = s.split_whitespace().filter(|x| !x.is_empty())
-            .map(Turn::from_str).collect::<Result<Vec<_>, _>>().or(Err(()));
+            .map(Turn::from_str).collect::<Result<Vec<_>, _>>();
         Ok(Turns(r?))
     }
 }

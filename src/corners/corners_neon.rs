@@ -135,13 +135,7 @@ impl CornersTrait for Corners {
         out |= (a >> 21) & (0x1f << 35);
         out
     }
-    fn speffz(self) -> String {
-        corners_array::Corners::from(self).speffz()
-    }
     fn net_twist(&self) -> u8 {
         unsafe { ((vaddv_u8(vand_u8(self.0, CO_MASK))) >> 3) % 3 }
-    }
-    fn from_speffz(s: &str) -> Result<Self, ()> {
-        Ok(corners_array::Corners::from_speffz(s)?.into())
     }
 }

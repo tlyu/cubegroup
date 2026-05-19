@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display};
 pub mod corners_array;
 pub mod corners_neon;
 mod corners_convert;
+use crate::speffz::*;
 
 pub(crate) const NCORNERS: usize = 8;
 pub(crate) const NTWIST: usize = 3;
@@ -23,24 +24,16 @@ static CORNERS_SINGMASTER: [[&str; NCORNERS]; NTWIST] = [
     ],
 ];
 
-const SPEFFZ_CORNERS: [&str; 3] = [
-    "ABCDUVWX",
-    "RNJFLPTH",
-    "EQMIGKOS",
-];
-
 pub trait CornersTrait
     where Self: Clone + Copy + Debug + Default + Display
-        + crate::CubeOps
+        + crate::CubeOps + Speffz
 {
     type Cycles: CornerCyclesTrait;
     fn new() -> Self { Self::default() }
     fn parity(&self) -> bool;
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
-    fn speffz(self) -> String;
     fn net_twist(&self) -> u8;
-    fn from_speffz(s: &str) -> Result<Self, ()>;
 }
 pub trait CornerCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;

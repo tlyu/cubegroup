@@ -92,10 +92,10 @@ impl Cube {
             self.1.net_flip() == 0 &&
             self.0.parity() == self.1.parity()
     }
-    pub fn from_speffz(s: &str) -> Result<Self, ()> {
+    pub fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError> {
         let mut v = s.split('.');
-        let Some(c) = v.next() else { return Err(()) };
-        let Some(e) = v.next() else { return Err(()) };
+        let Some(c) = v.next() else { return Err(ParseSpeffzError::MiscParseError) };
+        let Some(e) = v.next() else { return Err(ParseSpeffzError::MiscParseError) };
         Ok(Cube(Corners::from_speffz(c)?, Edges::from_speffz(e)?))
     }
 }
