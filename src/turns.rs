@@ -3,6 +3,8 @@ use std::iter::{IntoIterator, Iterator};
 use std::ops::{Deref, Index, IndexMut};
 use std::str::FromStr;
 
+use itertools::Itertools;
+
 pub(crate) const NTURNS: usize = 18;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -219,13 +221,8 @@ impl AsRef<[Turn]> for Turns {
 }
 impl Display for Turns {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let mut first = true;
-        for t in &self.0 {
-            if !first { write!(f, " ")?; }
-            first = false;
-            write!(f, "{t}")?;
-        }
-        Ok(())
+        let s = self.0.iter().map(|x| x.to_string()).join(" ");
+        write!(f, "{s}")
     }
 }
 impl FromStr for Turns {

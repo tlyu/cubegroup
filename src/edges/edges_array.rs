@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
 use bytemuck::*;
+use itertools::Itertools;
 
 use crate::*;
 use crate::speffz::*;
@@ -172,7 +173,7 @@ impl EdgeCyclesTrait for EdgeCycles {
 impl Display for EdgeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         for (c, flip) in &self.0 {
-            let s = c.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(" ");
+            let s = c.iter().join(",");
             write!(f, "({s})")?;
             match flip {
                 x if *x != 0 => { write!(f, "+")?; },

@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 use std::ops::{Index, IndexMut, Mul, Not};
 
 use bytemuck::*;
+use itertools::Itertools;
 
 use super::*;
 use crate::*;
@@ -213,7 +214,7 @@ impl CornerCyclesTrait for CornerCycles {
 impl Display for CornerCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         for (c, twist) in &self.0 {
-            let s = c.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(",");
+            let s = c.iter().join(",");
             write!(f, "({s})")?;
             match twist % 3 {
                 1 => { write!(f, "-")?; },
