@@ -1,7 +1,6 @@
 #![cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use std::arch::aarch64::*;
 use std::cmp::Ordering;
-use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 use std::ops::{Mul, Not};
 
@@ -31,11 +30,6 @@ pub struct Corners(uint8x8_t);
 impl Default for Corners {
     fn default() -> Corners {
         Corners(CORNERS_IDENT)
-    }
-}
-impl Display for Corners {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", corners_array::Corners::from(*self))
     }
 }
 impl From<Corners> for corners_array::Corners {

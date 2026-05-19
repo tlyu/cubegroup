@@ -11,8 +11,8 @@ use crate::*;
 #[repr(transparent)]
 pub struct Corner(pub(crate) u8);
 impl Corner {
-    fn id(&self) -> u8 { self.0 & 0x07 }
-    fn twist(&self) -> u8 { (self.0 & 0x18) >> 3 }
+    pub(crate) fn id(&self) -> u8 { self.0 & 0x07 }
+    pub(crate) fn twist(&self) -> u8 { (self.0 & 0x18) >> 3 }
     fn dotwist(&self, t: u8) -> Self {
         Corner(self.id() | (((self.twist() + t) % 3) << 3))
     }
@@ -30,20 +30,6 @@ impl Corner {
 }
 impl From<u8> for Corner {
     fn from(id: u8) -> Corner { Corner(id) }
-}
-// Singmaster piece notation: facets in clockwise order
-static CORNERS_SINGMASTER: [&str; 8] = [
-    "ULB", "UBR", "URF", "UFL",
-    "DLF", "DFR", "DRB", "DBL"
-];
-impl Display for Corner {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let s = CORNERS_SINGMASTER[self.id() as usize];
-        let twist = 3 - self.twist() as usize;
-        // Singmaster piece notation has the U/D facet first,
-        // so invert the twist to output in the correct order
-        write!(f, "{}{}", &s[(twist)..], &s[..(twist)])
-    }
 }
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Pod, Zeroable)]
 #[repr(transparent)]
@@ -164,12 +150,6 @@ impl Corners {
             out = out * *x;
         }
         out
-    }
-}
-impl Display for Corners {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        let s = self.0.map(|x| x.to_string()).join(" ");
-        write!(f, "{s}")
     }
 }
 impl Index<u8> for Corners {

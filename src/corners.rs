@@ -2,8 +2,26 @@ use std::fmt::{Debug, Display};
 
 pub mod corners_array;
 pub mod corners_neon;
+mod corners_convert;
 
-const NCORNERS: usize = 8;
+pub(crate) const NCORNERS: usize = 8;
+pub(crate) const NTWIST: usize = 3;
+
+// Singmaster piece notation: facets in clockwise order
+static CORNERS_SINGMASTER: [[&str; NCORNERS]; NTWIST] = [
+    [
+        "ULB", "UBR", "URF", "UFL",
+        "DLF", "DFR", "DRB", "DBL",
+    ],
+    [
+        "BUL", "RUB", "FUR", "LUF",
+        "FDL", "RDF", "BDR", "LDB",
+    ],
+    [
+        "LBU", "BRU", "RFU", "FLU",
+        "LFD", "FRD", "RBD", "BLD",
+    ],
+];
 
 const SPEFFZ_CORNERS: [&str; 3] = [
     "ABCDUVWX",
@@ -61,7 +79,17 @@ pub(crate) use corner_turns;
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
+
+    #[test]
+    fn test_singmaster() {
+        for twist in 0..NTWIST {
+            for id in 0..NCORNERS {
+                let s = CORNERS_SINGMASTER[twist][id];
+                assert_eq!(s[twist..].to_string()+&s[..twist], CORNERS_SINGMASTER[0][id], "{} {}", twist, id);
+            }
+        }
+    }
 
     #[test]
     fn test_speffz() {
