@@ -46,7 +46,7 @@ impl CubeOps for Corners {}
 impl CornersTrait for Corners {
     type Cycles = CornerCycles;
     fn parity(&self) -> bool {
-        let mut unseen = 0xffu8;
+        let mut unseen = (1u16 << NCORNERS) - 1;
         let mut i = 0u8;
         let mut out = false;
         while unseen != 0 {
@@ -66,18 +66,16 @@ impl CornersTrait for Corners {
         out
     }
     fn cycles(&self) -> CornerCycles {
-        let mut unseen = 0xffu8;
+        let mut unseen = (1u16 << NCORNERS) - 1;
         let mut i = 0u8;
         let mut out = CornerCycles::default();
         let mut v = Vec::<Corner>::new();
-        let mut twist = 0u8;
         while unseen != 0 {
             unseen &= !(1 << i);
             // Follow a cycle, including pieces twisted in place
             if self[i].id() != i || self[i].twist() != 0 {
-                twist = (twist + 3 - self[i].twist()) % 3;
+                v.insert(0, self[i]);
                 i = self[i].id();
-                v.insert(0, Corner(i).untwist(twist));
                 // Keep accumulating until we get back to the cycle start
                 if (unseen & (1 << i)) != 0 {
                     continue;
@@ -89,8 +87,7 @@ impl CornersTrait for Corners {
                 continue;
             }
             // Append a cycle if there is a non-empty one
-            out.0.push((v, twist));
-            twist = 0;
+            out.0.push(v);
             v = Vec::<Corner>::new();
         }
         out
@@ -143,30 +140,40 @@ macro_rules! corners {
 static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Debug, Default)]
-pub struct CornerCycles(Vec<(Vec<Corner>, u8)>);
+pub struct CornerCycles(Vec<Vec<Corner>>);
 impl CornerCyclesTrait for CornerCycles {
     fn speffz(&self) -> String {
         let mut out = String::new();
-        for (c, twist) in &self.0 {
-            let s: String = c.iter().map(|x| x.speffz()).collect();
-            let t = match twist % 3{
-                1 => "-",
-                2 => "+",
-                _  => "",
+        for cycle in &self.0 {
+            let mut twist = 0u8;
+            let s: String = cycle.iter().map(|x| {
+                let ptwist = twist;
+                twist = (twist + 3 - x.twist()) % 3;
+                Corner(x.id()).dotwist(ptwist).speffz()
+            }).collect();
+            out += &format!("({})", s);
+            match twist {
+                2 => out += "+",
+                1 => out += "-",
+                _ => ()
             };
-            out += &format!("({}){}", s, t);
         }
         out
     }
 }
 impl Display for CornerCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        for (c, twist) in &self.0 {
-            let s = c.iter().join(",");
+        for cycle in &self.0 {
+            let mut twist = 0u8;
+            let s = cycle.iter().map(|x| {
+                let ptwist = twist;
+                twist = (twist + 3 - x.twist()) % 3;
+                Corner(x.id()).dotwist(ptwist)
+            }).join(",");
             write!(f, "({s})")?;
-            match twist % 3 {
-                1 => { write!(f, "-")?; },
-                2 => { write!(f, "+")?; },
+            match twist {
+                2 => write!(f, "+")?,
+                1 => write!(f, "-")?,
                 _ => (),
             };
         }
