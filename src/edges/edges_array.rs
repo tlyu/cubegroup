@@ -82,16 +82,15 @@ impl EdgesTrait for Edges {
         out
     }
     fn cycles(&self) -> EdgeCycles {
-        let mut unseen = 0xfffu16;
+        let mut unseen = (1u16 << NEDGES) - 1;
         let mut i = 0u8;
         let mut out = EdgeCycles::default();
         let mut v = Vec::<Edge>::new();
-        let mut flip = 0u8;
         while unseen != 0 {
             unseen &= !(1 << i);
-            // Follow a cycle, including pieces twisted in place
+            // Follow a cycle, including pieces flipped in place
             if self[i].0 & 0xf != i || self[i].0 & 0x10 != 0 {
-                flip ^= self[i].0 & 0x10;
+                let flip = self[i].0 & 0x10;
                 i = self[i].0 & 0xf;
                 v.insert(0, Edge(i | flip));
                 // Keep accumulating until we get back to the cycle start
@@ -105,8 +104,7 @@ impl EdgesTrait for Edges {
                 continue;
             }
             // Append a cycle if there is a non-empty one
-            out.0.push((v, flip));
-            flip = 0;
+            out.0.push(v);
             v = Vec::<Edge>::new();
         }
         out
@@ -150,14 +148,19 @@ macro_rules! edges {
 static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
 #[derive(Debug, Default)]
-pub struct EdgeCycles(Vec<(Vec<Edge>, u8)>);
+pub struct EdgeCycles(Vec<Vec<Edge>>);
 impl EdgeCyclesTrait for EdgeCycles {
     fn speffz(&self) -> String {
         let mut out = String::new();
-        for (c, flip) in &self.0 {
-            let s: String = c.iter().map(|x| x.speffz()).collect();
+        for cycle in &self.0 {
+            let mut flip = 0u8;
+            let s: String = cycle.iter().map(|x| {
+                let pflip = flip;
+                flip ^= x.0 & 0x10;
+                Edge((x.0 & 0xf) | pflip).speffz()
+            }).collect();
             let f = match flip {
-                1 => "+",
+                0x10 => "+",
                 _ => "",
             };
             out += &format!("({}){}", s, f);
@@ -167,11 +170,16 @@ impl EdgeCyclesTrait for EdgeCycles {
 }
 impl Display for EdgeCycles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        for (c, flip) in &self.0 {
-            let s = c.iter().join(",");
+        for cycle in &self.0 {
+            let mut flip = 0u8;
+            let s: String = cycle.iter().map(|x| {
+                let pflip = flip;
+                flip ^= x.0 & 0x10;
+                Edge((x.0 &0xf) | pflip)
+            }).join(",");
             write!(f, "({s})")?;
             match flip {
-                x if *x != 0 => { write!(f, "+")?; },
+                0x10 => { write!(f, "+")?; },
                 _ => (),
             };
         }
