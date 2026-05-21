@@ -62,7 +62,7 @@ impl CubeOps for Edges {}
 impl EdgesTrait for Edges {
     type Cycles = EdgeCycles;
     fn parity(&self) -> bool {
-        let mut unseen = 0xfffu16;
+        let mut unseen = (1u16 << NEDGES) - 1;
         let mut i = 0u8;
         let mut out = false;
         while unseen != 0 {
@@ -90,9 +90,8 @@ impl EdgesTrait for Edges {
             unseen &= !(1 << i);
             // Follow a cycle, including pieces flipped in place
             if self[i].0 & 0xf != i || self[i].0 & 0x10 != 0 {
-                let flip = self[i].0 & 0x10;
+                v.insert(0, self[i]);
                 i = self[i].0 & 0xf;
-                v.insert(0, Edge(i | flip));
                 // Keep accumulating until we get back to the cycle start
                 if (unseen & (1 << i)) != 0 {
                     continue;
