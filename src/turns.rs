@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 use std::iter::{IntoIterator, Iterator};
-use std::ops::{Deref, Index, IndexMut};
+use std::ops::{Deref, Index, IndexMut, Not};
 use std::str::FromStr;
 
 use itertools::Itertools;
@@ -78,6 +78,27 @@ pub enum Turn {
     B1 = 15,
     B2 = 16,
     B3 = 17,
+}
+impl Not for Turn {
+    type Output = Turn;
+    fn not(self) -> Turn {
+        use Turn::*;
+        match self {
+            U1 => U3,
+            U3 => U1,
+            R1 => R3,
+            R3 => R1,
+            F1 => F3,
+            F3 => F1,
+            D1 => D3,
+            D3 => D1,
+            L1 => L3,
+            L3 => L1,
+            B1 => B3,
+            B3 => B1,
+            x => x,
+        }
+    }
 }
 impl Turn {
     fn axis(self) -> Axis {
@@ -216,6 +237,13 @@ impl FromStr for Turn {
 
 #[derive(Debug, Default)]
 pub struct Turns(pub(crate) Vec<Turn>);
+impl Not for Turns {
+    type Output = Turns;
+    fn not(self) -> Turns {
+        let v: Vec<_> = self.0.into_iter().rev().map(|x| !x).collect();
+        Turns(v)
+    }
+}
 impl Deref for Turns {
     type Target = [Turn];
     fn deref(&self) -> &Self::Target {
