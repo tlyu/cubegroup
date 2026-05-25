@@ -1,4 +1,5 @@
 use std::fmt::{self, Display};
+use std::hash::Hash;
 use std::ops::{Mul, Not};
 
 use forward_ref_generic::forward_ref_binop;
@@ -23,7 +24,7 @@ pub use {corners_array::*, edges_array::*};
 
 pub trait CubeOps where
         Self: Sized + Mul + Mul<Turn> + for<'b> Mul<&'b Turn> + Not,
-        Self: Eq + PartialEq + PartialOrd + Ord
+        Self: Eq + Hash + PartialEq + PartialOrd + Ord
 {
 }
 
@@ -56,11 +57,7 @@ impl Not for Cube {
 }
 impl Cube {
     pub fn turns(&self, t: &[Turn]) -> Cube {
-        let mut out = *self;
-        for x in t {
-            out = out * *x;
-        }
-        out
+        self * t
     }
     pub fn cycles(&self) -> CubeCycles {
         CubeCycles(self.0.cycles(), self.1.cycles())
@@ -113,7 +110,9 @@ impl Display for CubeCycles {
     }
 }
 
-gen_ops!(Cube);
+gen_ops!{
+    Cube
+}
 
 #[cfg(test)]
 mod tests {

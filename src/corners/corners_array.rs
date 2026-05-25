@@ -110,11 +110,7 @@ impl CornersTrait for Corners {
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }
     pub fn turns(&self, t: &[Turn]) -> Self {
-        let mut out = *self;
-        for x in t {
-            out = out * *x;
-        }
-        out
+        self * t
     }
 }
 impl Index<u8> for Corners {

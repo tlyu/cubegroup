@@ -12,12 +12,8 @@ macro_rules! gen_ops {
         impl<T: AsRef<[Turn]>> Mul<T> for $t {
             type Output = $t;
             fn mul(self, rhs: T) -> Self::Output {
-                let mut out = self;
                 let rhs = rhs.as_ref();
-                for t in rhs {
-                    out = out * t;
-                }
-                out
+                rhs.iter().fold(self, Mul::<&Turn>::mul)
             }
         }
         // Can't use forward_ref_binop here, because blanket impl conflicts

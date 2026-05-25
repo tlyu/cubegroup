@@ -129,11 +129,7 @@ impl EdgesTrait for Edges {
 }
 impl Edges {
     pub fn turns(&self, t: &[Turn]) -> Edges {
-        let mut out = *self;
-        for x in t {
-            out = out * *x;
-        }
-        out
+        self * t
     }
 }
 
