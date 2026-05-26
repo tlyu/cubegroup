@@ -39,6 +39,16 @@ const EDGES_FROM_SPEFFZ: [u8; NEDGES * NFLIP] = [
     0x10, 0x04, 0x1a, 0x05, 0x08, 0x09, 0x0a, 0x0b,
 ];
 
+pub trait SpeffzLetter: Sized {
+    fn from_speffz(c: char) -> Result<Self, ParseSpeffzError>;
+    fn speffz(self) -> char;
+}
+
+pub trait Speffz: Sized {
+    fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError>;
+    fn speffz(self) -> String;
+}
+
 impl SpeffzLetter for Corner {
     fn speffz(self) -> char {
         SPEFFZ_CORNERS[self.twist() as usize][self.id() as usize] as char
@@ -62,16 +72,6 @@ impl Speffz for corners_array::Corners {
         let out: [Corner; NCORNERS] = r?[..].try_into()?;
         Ok(corners_array::Corners(out))
     }
-}
-
-pub trait SpeffzLetter: Sized {
-    fn from_speffz(c: char) -> Result<Self, ParseSpeffzError>;
-    fn speffz(self) -> char;
-}
-
-pub trait Speffz: Sized {
-    fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError>;
-    fn speffz(self) -> String;
 }
 
 impl SpeffzLetter for Edge {
