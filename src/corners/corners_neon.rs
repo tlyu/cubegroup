@@ -67,17 +67,20 @@ impl PartialOrd for Corners {
 impl Not for Corners {
     type Output = Corners;
     fn not(self) -> Self {
+        let cp = unsafe { vand_u8(self.0, CP_MASK) };
+        let co = unsafe { vand_u8(self.0, CO_MASK) };
         let mut out = [0u8; 8];
-        let a: [u8; NCORNERS] = must_cast(self);
-        for i in 0..NCORNERS {
-            let slot = a[i] as usize & 0x07;
-            let mut twist = a[i] & 0x18;
-            // Negate twist mod 3
-            if twist != 0x00 {
-                twist ^= 0x18;
-            }
-            out[slot] = i as u8 | twist;
+        let a: [u8; NCORNERS] = must_cast(cp);
+        for (i, c) in a.into_iter().enumerate() {
+            out[c as usize] = i as u8;
         }
+        let inv_cp = must_cast(out);
+        // Invert CO by subtracting it from CO_MASK
+        let mut inv_co = unsafe { vsub_u8(CO_MASK, co) };
+        // Adjust if needed
+        inv_co = unsafe { vmin_u8(inv_co, vsub_u8(inv_co, CO_MASK)) };
+        // Permute inverted CO with inverted CP, then combine
+        let out = unsafe { vorr_u8(inv_cp, vtbl1_u8(inv_co, inv_cp)) };
         must_cast(out)
     }
 }

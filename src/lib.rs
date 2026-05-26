@@ -143,6 +143,9 @@ mod tests {
             assert_eq!(edges * lhs, !(edges * rhs));
             assert_eq!(cube * lhs, !(cube * rhs));
         }
+        for t in allturns() {
+            assert_eq!(!!(cube * t), cube *t);
+        }
     }
 
     #[test]
