@@ -41,6 +41,8 @@ pub trait EdgesTrait
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
     fn net_flip(&self) -> u8;
+    fn eo(&self) -> u16;
+    fn set_eo(eo: u16) -> Self;
 }
 pub trait EdgeCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;
