@@ -15,7 +15,7 @@ pub enum ParseSpeffzError {
     MiscParseError,
 }
 
-const SPEFFZ_CORNERS: [&str; 3] = [
+const SPEFFZ_CORNERS: [&str; NTWIST] = [
     "ABCDUVWX",
     "RNJFLPTH",
     "EQMIGKOS",
@@ -26,17 +26,29 @@ const SPEFFZ_EDGES: [&str; NFLIP] = [
     "QMIEHNPFKOSG"
 ];
 
+const CORNERS_FROM_SPEFFZ: [u8; NCORNERS * NTWIST] = [
+    0x00, 0x01, 0x02, 0x03, 0x10, 0x0b, 0x14, 0x0f,
+    0x13, 0x0a, 0x15, 0x0c, 0x12, 0x09, 0x16, 0x0d,
+    0x11, 0x08, 0x17, 0x0e, 0x04, 0x05, 0x06, 0x07,
+];
+
+const EDGES_FROM_SPEFFZ: [u8; NEDGES * NFLIP] = [
+    0x00, 0x01, 0x02, 0x03, 0x13, 0x17, 0x1b, 0x14,
+    0x12, 0x06, 0x18, 0x07, 0x11, 0x15, 0x19, 0x16,
+    0x10, 0x04, 0x1a, 0x05, 0x08, 0x09, 0x0a, 0x0b,
+];
 
 impl SpeffzLetter for Corner {
     fn speffz(self) -> char {
         SPEFFZ_CORNERS[self.twist() as usize].as_bytes()[self.id() as usize] as char
     }
     fn from_speffz(c: char) -> Result<Self, ParseSpeffzError> {
-        for twist in 0..3 {
-            let Some(id) = SPEFFZ_CORNERS[twist].find(c) else { continue; };
-            return Ok(Corner((id | (twist << 3)) as u8));
+        match c as u8 {
+            c @ b'A'..=b'X' => {
+                Ok(CORNERS_FROM_SPEFFZ[(c - b'A') as usize].into())
+            },
+            _ => Err(ParseSpeffzError::BadSpeffzLetter)
         }
-        Err(ParseSpeffzError::BadSpeffzLetter)
     }
 }
 
@@ -73,15 +85,15 @@ pub trait Speffz: Sized {
 
 impl SpeffzLetter for Edge {
     fn from_speffz(c: char) -> Result<Self, ParseSpeffzError> {
-        for flip in 0..2 {
-            let Some(id) = SPEFFZ_EDGES[flip].find(c) else { continue; };
-            return Ok(Edge((id | (flip << 4)) as u8));
+        match c as u8 {
+            c @ b'A'..=b'X' => {
+                Ok(Edge(EDGES_FROM_SPEFFZ[(c - b'A') as usize].into()))
+            },
+            _ => Err(ParseSpeffzError::BadSpeffzLetter),
         }
-        Err(ParseSpeffzError::BadSpeffzLetter)
     }
     fn speffz(self) -> char {
-        SPEFFZ_EDGES[(self.0 as usize) >> 4].as_bytes()[self.0 as usize & 0xf] as char        
-        
+        SPEFFZ_EDGES[(self.0 as usize) >> 4].as_bytes()[self.0 as usize & 0xf] as char
     }
 }
 
@@ -103,5 +115,20 @@ impl Speffz for edges_neon::Edges {
     }
     fn speffz(self) -> String {
         edges_array::Edges::from(self).speffz()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_speffz_roundtrip() {
+        for s in 'A'..='X' {
+            let c = Corner::from_speffz(s).unwrap();
+            let e = Edge::from_speffz(s).unwrap();
+            assert_eq!(s, c.speffz());
+            assert_eq!(s, e.speffz());
+        }
     }
 }
