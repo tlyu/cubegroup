@@ -1,5 +1,6 @@
 use std::array::TryFromSliceError;
 
+use bytemuck::*;
 use thiserror::Error;
 
 use super::corners::*;
@@ -15,10 +16,10 @@ pub enum ParseSpeffzError {
     MiscParseError,
 }
 
-const SPEFFZ_CORNERS: [&str; NTWIST] = [
-    "ABCDUVWX",
-    "RNJFLPTH",
-    "EQMIGKOS",
+const SPEFFZ_CORNERS: [[u8; NCORNERS]; NTWIST] = [
+    *b"ABCDUVWX",
+    *b"RNJFLPTH",
+    *b"EQMIGKOS",
 ];
 
 const SPEFFZ_EDGES: [&str; NFLIP] = [
@@ -40,7 +41,7 @@ const EDGES_FROM_SPEFFZ: [u8; NEDGES * NFLIP] = [
 
 impl SpeffzLetter for Corner {
     fn speffz(self) -> char {
-        SPEFFZ_CORNERS[self.twist() as usize].as_bytes()[self.id() as usize] as char
+        SPEFFZ_CORNERS[self.twist() as usize][self.id() as usize] as char
     }
     fn from_speffz(c: char) -> Result<Self, ParseSpeffzError> {
         match c as u8 {
@@ -60,16 +61,6 @@ impl Speffz for corners_array::Corners {
         let r: Result<Vec<_>, _> = s.chars().map(|c| Corner::from_speffz(c)).collect();
         let out: [Corner; NCORNERS] = r?[..].try_into()?;
         Ok(corners_array::Corners(out))
-    }
-}
-
-#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-impl Speffz for corners_neon::Corners {
-    fn speffz(self) -> String {
-        corners_array::Corners::from(self).speffz()
-    }
-    fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError> {
-        Ok(corners_array::Corners::from_speffz(s)?.into())
     }
 }
 
@@ -109,12 +100,35 @@ impl Speffz for edges_array::Edges {
 }
 
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-impl Speffz for edges_neon::Edges {
-    fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError> {
-        Ok(edges_array::Edges::from_speffz(s)?.into())
+mod neon {
+    use std::arch::aarch64::*;
+    use super::*;
+
+    impl Speffz for corners_neon::Corners {
+        fn speffz(self) -> String {
+            let t = must_cast(SPEFFZ_CORNERS);
+            let s: [u8; 8] = must_cast(unsafe { vtbl3_u8(t, self.0) });
+            unsafe { String::from_utf8_unchecked(s.into()) }
+        }
+        fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError> {
+            let a: [u8; NCORNERS] = s.as_bytes().try_into()?;
+            let idx = unsafe { vsub_u8(must_cast(a), must_cast([b'A'; 8])) };
+            let err = unsafe { vmaxv_u8(idx) };
+            let out = unsafe { vtbl3_u8(must_cast(CORNERS_FROM_SPEFFZ), idx) };
+            match err {
+                0..24 => Ok(must_cast(out)),
+                _ => Err(ParseSpeffzError::BadSpeffzLetter)
+            }
+        }
     }
-    fn speffz(self) -> String {
-        edges_array::Edges::from(self).speffz()
+
+    impl Speffz for edges_neon::Edges {
+        fn from_speffz(s: &str) -> Result<Self, ParseSpeffzError> {
+            Ok(edges_array::Edges::from_speffz(s)?.into())
+        }
+        fn speffz(self) -> String {
+            edges_array::Edges::from(self).speffz()
+        }
     }
 }
 

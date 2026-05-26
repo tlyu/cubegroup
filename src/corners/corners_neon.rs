@@ -25,7 +25,7 @@ static CORNER_TURNS: [Corners; NTURNS] = corner_turns!();
 
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
-pub struct Corners(uint8x8_t);
+pub struct Corners(pub(crate) uint8x8_t);
 
 impl Default for Corners {
     fn default() -> Corners {
