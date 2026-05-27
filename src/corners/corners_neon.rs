@@ -141,4 +141,14 @@ impl CornersTrait for Corners {
     fn net_twist(&self) -> u8 {
         unsafe { ((vaddv_u8(vand_u8(self.0, CO_MASK))) >> 3) % 3 }
     }
+    fn co(&self) -> u16 {
+        const FACTORS: uint16x8_t = must_cast([
+            1u16, 3, 3*3, 3*3*3, 3*3*3*3, 3*3*3*3*3, 3*3*3*3*3*3, 0
+        ]);
+        let wide = unsafe { vmovl_u8(vshr_n_u8::<3>(self.0)) };
+        unsafe { vaddvq_u16(vmulq_u16(wide, FACTORS)) }
+    }
+    fn set_co(co: u16) -> Self {
+        corners_array::Corners::set_co(co).into()
+    }
 }

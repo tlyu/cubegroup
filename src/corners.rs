@@ -51,6 +51,8 @@ pub trait CornersTrait
     fn cycles(&self) -> Self::Cycles;
     fn pack(&self) -> u64;
     fn net_twist(&self) -> u8;
+    fn co(&self) -> u16;
+    fn set_co(co: u16) -> Self;
 }
 pub trait CornerCyclesTrait: Debug + Display {
     fn speffz(&self) -> String;

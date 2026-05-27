@@ -106,6 +106,23 @@ impl CornersTrait for Corners {
     fn net_twist(&self) -> u8 {
         self.0.into_iter().map(|x| x.twist()).sum::<u8>() % 3
     }
+    fn co(&self) -> u16 {
+        self.0.iter().take(NCORNERS-1).enumerate()
+            .map(|(i, c)| c.twist() as u16 * 3u16.pow(i as u32))
+            .sum::<u16>()
+    }
+    fn set_co(co: u16) -> Self {
+        let mut out = Corners::default();
+        let mut net_twist = 0u8;
+        for (i, c) in out.0.iter_mut().take(NCORNERS-1).enumerate() {
+            let twist = ((co / 3u16.pow(i as u32)) % 3) as u8;
+            *c = c.dotwist(twist as u8);
+            net_twist += twist;
+        }
+        net_twist %= 3;
+        out.0[NCORNERS-1] = out.0[NCORNERS-1].dotwist((3-net_twist)%3);
+        out
+    }
 }
 impl Corners {
     fn new () -> Self { Corners([Corner(0); 8]) }
