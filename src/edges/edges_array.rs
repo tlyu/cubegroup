@@ -131,9 +131,12 @@ impl EdgesTrait for Edges {
         for (i, e) in self.0.iter().enumerate() {
             out |= (e.0 as u16 >> 4) << i;
         }
-        out
+        out & 0x7ff
     }
     fn set_eo(eo: u16) -> Self {
+        let eo = eo & 0x7ff;
+        let parity = ((eo.count_ones() & 1) << 11)as u16;
+        let eo = (eo & 0x7ff) | parity;
         let mut out = Edges::default();
         for (i, e) in out.0.iter_mut().enumerate() {
             e.0 |= ((eo >> i) << 4) as u8 & 0x10;

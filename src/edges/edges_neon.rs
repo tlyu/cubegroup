@@ -141,9 +141,12 @@ impl EdgesTrait for Edges {
         let lo = unsafe { vshl_u8(vget_low_u8(flips), SHIFTS) };
         let hi = unsafe { vshl_u8(vget_high_u8(flips), SHIFTS) };
         let out: u16 = unsafe { vaddv_u8(lo) as u16 };
-        out | unsafe { (vaddv_u8(hi) as u16) << 8 }
+        (out | unsafe { (vaddv_u8(hi) as u16) << 8 }) & 0x7ff
     }
     fn set_eo(eo: u16) -> Self {
+        let eo = eo & 0x7ff;
+        let parity = ((eo.count_ones() & 1) << 11) as u16;
+        let eo = (eo & 0x7ff) | parity;
         const SHIFTS: int8x8_t = must_cast([0i8, -1, -2, -3, -4, -5, -6, -7]);
         let lo = unsafe { vshl_u8(must_cast([eo as u8; 8]), SHIFTS) };
         let hi = unsafe { vshl_u8(must_cast([(eo >> 8) as u8; 8]), SHIFTS) };
