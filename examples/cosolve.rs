@@ -12,18 +12,7 @@ fn semi(co: u16) -> u32 {
     out
 }
 
-fn init_table() -> Vec<Vec<u16>> {
-    let mut v = Vec::new();
-    for i in 0u16..NCO {
-        let row: Vec<_> = allturns().into_iter().map(|t| {
-            (Corners::from_co(i) * t).co()
-        }).collect();
-        v.push(row);
-    }
-    v
-}
-
-fn idfs(init_co: u16, depth: u8, prev_turn: Option<Turn>, table: &Vec<Vec<u16>>, v: &mut Vec<Turn>) -> ControlFlow<(), ()> {
+fn idfs(init_co: u16, depth: u8, prev_turn: Option<Turn>, table: &COMul, v: &mut Vec<Turn>) -> ControlFlow<(), ()> {
     if depth == 0 {
         if init_co == 0 {
             if let Some(t) = prev_turn {
@@ -35,7 +24,7 @@ fn idfs(init_co: u16, depth: u8, prev_turn: Option<Turn>, table: &Vec<Vec<u16>>,
         }
     }
     canonturns(prev_turn).into_iter().try_for_each(|t| {
-        let co = table[init_co as usize][t as usize];
+        let co = table.mul(init_co, t);
         idfs(co, depth - 1, Some(t), table, v)
     }).map_break(|_| {
         if let Some(t) = prev_turn {
@@ -45,7 +34,7 @@ fn idfs(init_co: u16, depth: u8, prev_turn: Option<Turn>, table: &Vec<Vec<u16>>,
 }
 
 fn main() {
-    let table = init_table();
+    let table = COMul::new();
     for co in 0..NCO {
         let mut v = Vec::<Turn>::new();
         let r = (0..7).try_for_each(|d| {

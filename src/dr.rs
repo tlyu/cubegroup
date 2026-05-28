@@ -6,11 +6,43 @@
 //! Orientation coordinates omit the most significant digit, because the
 //! total twist/flip constraints make it redundant.
 
+use std::sync::LazyLock;
+
 use crate::corners::*;
 use crate::edges::*;
+use crate::Corners;
+use crate::turns::*;
 
 pub const NCO: u16 = 2187;
 pub const NEO: u16 = 2048;
+
+static CO_TABLE: LazyLock::<COMul> = LazyLock::new(COMul::new);
+
+pub struct COMul(Vec<Vec<u16>>);
+
+impl COMul {
+    pub fn new() -> Self {
+        let mut v = Vec::new();
+        for i in 0u16..NCO {
+            let row: Vec<_> = allturns().into_iter().map(|t| {
+                (Corners::from_co(i) * t).co()
+            }).collect();
+            v.push(row);
+        }
+        Self(v)
+    }
+    #[inline]
+    pub fn mul(&self, co: u16, t: Turn) -> u16 {
+        self.0[co as usize][t as usize]
+    }
+}
+
+pub fn init_co_mul() {
+    let _ = &CO_TABLE;
+}
+pub fn co_mul(co: u16, t: Turn) -> u16 {
+    CO_TABLE.mul(co, t)
+}
 
 pub trait COConv {
     fn co(&self) -> u16;
