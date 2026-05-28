@@ -1,12 +1,13 @@
 use std::ops::ControlFlow::{self, Break, Continue};
 
 use cubegroup::*;
+use cubegroup::dr::*;
 
 fn init_table() -> Vec<Vec<u16>> {
     let mut v = Vec::new();
-    for i in 0u16..2048 {
+    for i in 0u16..NEO {
         let row: Vec<_> = allturns().into_iter().map(|t| {
-            (Edges::set_eo(i) * t).eo()
+            (Edges::from_eo(i) * t).eo()
         }).collect();
         v.push(row);
     }
@@ -36,7 +37,7 @@ fn idfs(init_eo: u16, depth: u8, prev_turn: Option<Turn>, table: &Vec<Vec<u16>>,
 
 fn main() {
     let table = init_table();
-    for eo in 0..2048 {
+    for eo in 0..NEO {
         let mut v = Vec::<Turn>::new();
         let r = (0..8).try_for_each(|d| {
             idfs(eo, d, None, &table, &mut v)

@@ -1,6 +1,7 @@
 use std::ops::ControlFlow::{self, Break, Continue};
 
 use cubegroup::*;
+use cubegroup::dr::*;
 
 // Expand base 3 digits as base 16 for better display
 fn semi(co: u16) -> u32 {
@@ -13,9 +14,9 @@ fn semi(co: u16) -> u32 {
 
 fn init_table() -> Vec<Vec<u16>> {
     let mut v = Vec::new();
-    for i in 0u16..2187 {
+    for i in 0u16..NCO {
         let row: Vec<_> = allturns().into_iter().map(|t| {
-            (Corners::set_co(i) * t).co()
+            (Corners::from_co(i) * t).co()
         }).collect();
         v.push(row);
     }
@@ -45,7 +46,7 @@ fn idfs(init_co: u16, depth: u8, prev_turn: Option<Turn>, table: &Vec<Vec<u16>>,
 
 fn main() {
     let table = init_table();
-    for co in 0..2187 {
+    for co in 0..NCO {
         let mut v = Vec::<Turn>::new();
         let r = (0..7).try_for_each(|d| {
             idfs(co, d, None, &table, &mut v)

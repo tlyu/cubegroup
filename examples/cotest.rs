@@ -1,4 +1,5 @@
 use cubegroup::*;
+use cubegroup::dr::*;
 
 // Expand base 3 digits as base 16 for better display
 fn semi(co: u16) -> u32 {
@@ -12,10 +13,10 @@ fn semi(co: u16) -> u32 {
 fn main() {
     for t in allturns() {
         println!("{t}");
-        for i in 0u16..2187 {
-            let c = corners_neon::Corners::set_co(i) * t;
+        for i in 0u16..NCO {
+            let c = corners_neon::Corners::from_co(i) * t;
             println!("{:07x} {:07x} {}", semi(i), semi(c.co()), c.cycles().speffz());
-            let ca = corners_array::Corners::set_co(i) * t;
+            let ca = corners_array::Corners::from_co(i) * t;
             assert_eq!(c.co(), ca.co());
         }
     }

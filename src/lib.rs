@@ -16,6 +16,7 @@ mod turns;
 pub use turns::*;
 mod speffz;
 pub use speffz::*;
+pub mod dr;
 
 #[cfg(all(not(feature = "array"), target_arch = "aarch64", target_feature = "neon"))]
 pub use {corners_neon::*, edges_neon::*};

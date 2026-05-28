@@ -2,12 +2,13 @@ use std::time::Instant;
 use itertools::Itertools;
 
 use cubegroup::*;
+use cubegroup::dr::*;
 
 fn main() {
     let mut v = Vec::new();
     let now = Instant::now();
-    for i in 0u16..2048 {
-        let row: Vec<_> = allturns().into_iter().map(|t| (Edges::set_eo(i) * t).eo()).collect();
+    for i in 0u16..NEO {
+        let row: Vec<_> = allturns().into_iter().map(|t| (Edges::from_eo(i) * t).eo()).collect();
         v.push(row);
     }
     let elapsed = now.elapsed();

@@ -9,10 +9,10 @@ use bytemuck::*;
 use super::*;
 use crate::*;
 
-const EP_MASK: uint8x16_t = must_cast([0x0fu8; 16]);
-const EO_MASK: uint8x16_t = must_cast([0x10u8; 16]);
+pub(crate) const EP_MASK: uint8x16_t = must_cast([0x0fu8; 16]);
+pub(crate) const EO_MASK: uint8x16_t = must_cast([0x10u8; 16]);
 // The extra numbers allow the permutations to keep the upper bytes constant
-const EDGES_IDENT: uint8x16_t = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+pub(crate) const EDGES_IDENT: uint8x16_t = must_cast([0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 macro_rules! edges {
     ( $( ($id:expr, $flip:expr) ),* ) => {
@@ -27,7 +27,7 @@ static EDGE_TURNS: [Edges; NTURNS] = edge_turns!();
 
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
-pub struct Edges(uint8x16_t);
+pub struct Edges(pub(crate) uint8x16_t);
 impl Default for Edges {
     fn default() -> Self {
         Edges(EDGES_IDENT)
@@ -134,23 +134,5 @@ impl EdgesTrait for Edges {
     fn net_flip(&self) -> u8 {
         let x: u128 = must_cast(unsafe { vandq_u8(self.0, EO_MASK) });
         x.count_ones() as u8 & 1
-    }
-    fn eo(&self) -> u16 {
-        const SHIFTS: int8x8_t = must_cast([0i8, 1, 2, 3, 4, 5, 6, 7]);
-        let flips = unsafe { vshrq_n_u8::<4>(self.0) };
-        let lo = unsafe { vshl_u8(vget_low_u8(flips), SHIFTS) };
-        let hi = unsafe { vshl_u8(vget_high_u8(flips), SHIFTS) };
-        let out: u16 = unsafe { vaddv_u8(lo) as u16 };
-        (out | unsafe { (vaddv_u8(hi) as u16) << 8 }) & 0x7ff
-    }
-    fn set_eo(eo: u16) -> Self {
-        let eo = eo & 0x7ff;
-        let parity = ((eo.count_ones() & 1) << 11) as u16;
-        let eo = (eo & 0x7ff) | parity;
-        const SHIFTS: int8x8_t = must_cast([0i8, -1, -2, -3, -4, -5, -6, -7]);
-        let lo = unsafe { vshl_u8(must_cast([eo as u8; 8]), SHIFTS) };
-        let hi = unsafe { vshl_u8(must_cast([(eo >> 8) as u8; 8]), SHIFTS) };
-        let flips = unsafe { vandq_u8(vshlq_n_u8::<4>(vcombine_u8(lo, hi)), EO_MASK) };
-        Edges(unsafe { vorrq_u8(flips, EDGES_IDENT) })
     }
 }
