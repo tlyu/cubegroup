@@ -47,7 +47,7 @@ fn main() {
     let table = init_table();
     for co in 0..2187 {
         let mut v = Vec::<Turn>::new();
-        let r = (0..8).try_for_each(|d| {
+        let r = (0..7).try_for_each(|d| {
             idfs(co, d, None, &table, &mut v)
         });
         match r {
