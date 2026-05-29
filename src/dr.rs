@@ -38,8 +38,9 @@ impl COMul {
 }
 
 pub fn init_co_mul() {
-    let _ = &CO_TABLE;
+    LazyLock::force(&CO_TABLE);
 }
+#[inline]
 pub fn co_mul(co: u16, t: Turn) -> u16 {
     CO_TABLE.mul(co, t)
 }
