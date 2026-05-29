@@ -11,12 +11,14 @@ use std::sync::LazyLock;
 use crate::corners::*;
 use crate::edges::*;
 use crate::Corners;
+use crate::Edges;
 use crate::turns::*;
 
 pub const NCO: u16 = 2187;
 pub const NEO: u16 = 2048;
 
 static CO_TABLE: LazyLock::<COMul> = LazyLock::new(COMul::new);
+static EO_TABLE: LazyLock::<EOMul> = LazyLock::new(EOMul::new);
 
 pub struct COMul(Vec<Vec<u16>>);
 
@@ -43,6 +45,33 @@ pub fn init_co_mul() {
 #[inline]
 pub fn co_mul(co: u16, t: Turn) -> u16 {
     CO_TABLE.mul(co, t)
+}
+
+pub struct EOMul(Vec<Vec<u16>>);
+
+impl EOMul {
+    pub fn new() -> Self {
+        let mut v = Vec::new();
+        for i in 0u16..NEO {
+            let row: Vec<_> = allturns().into_iter().map(|t| {
+                (Edges::from_eo(i) * t).eo()
+            }).collect();
+            v.push(row);
+        }
+        Self(v)
+    }
+    #[inline]
+    pub fn mul(&self, eo: u16, t: Turn) -> u16 {
+        self.0[eo as usize][t as usize]
+    }
+}
+
+pub fn init_eo_mul() {
+    LazyLock::force(&EO_TABLE);
+}
+#[inline]
+pub fn eo_mul(eo: u16, t: Turn) -> u16 {
+    EO_TABLE.mul(eo, t)
 }
 
 pub trait COConv {
